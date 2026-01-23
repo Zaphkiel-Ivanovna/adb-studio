@@ -1,0 +1,82 @@
+name: 🚀 Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build-and-release:
+    name: 📦 Build & Release
+    runs-on: macos-14
+
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+
+      - name: 🛠️ Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode_15.2.app/Contents/Developer
+
+      - name: 📋 Show Xcode version
+        run: xcodebuild -version
+
+      - name: 🏷️ Get version from tag
+        id: version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+
+      - name: 🏗️ Build Release
+        run: |
+          xcodebuild -scheme "ADB-Studio" \
+            -configuration Release \
+            -destination "platform=macOS,arch=arm64" \
+            -derivedDataPath build \
+            clean build \
+            CODE_SIGN_IDENTITY="-" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO
+
+      - name: 💿 Create DMG
+        run: |
+          APP_NAME="ADB-Studio"
+          DMG_DIR="dmg-contents"
+          FINAL_DMG="ADB-Studio-${{ steps.version.outputs.VERSION }}.dmg"
+
+          mkdir -p "${DMG_DIR}"
+          cp -R "build/Build/Products/Release/${APP_NAME}.app" "${DMG_DIR}/"
+          ln -s /Applications "${DMG_DIR}/Applications"
+
+          hdiutil create -srcfolder "${DMG_DIR}" \
+            -volname "${APP_NAME}" \
+            -fs HFS+ \
+            -format UDZO \
+            -imagekey zlib-level=9 \
+            "${FINAL_DMG}"
+
+          echo "DMG_PATH=${FINAL_DMG}" >> $GITHUB_ENV
+
+      - name: 🗜️ Create ZIP
+        run: |
+          cd build/Build/Products/Release
+          zip -r -y "../../../../ADB-Studio-${{ steps.version.outputs.VERSION }}.zip" "ADB-Studio.app"
+          cd ../../../..
+          echo "ZIP_PATH=ADB-Studio-${{ steps.version.outputs.VERSION }}.zip" >> $GITHUB_ENV
+
+      - name: 🔐 Generate Checksums
+        run: |
+          shasum -a 256 "${{ env.DMG_PATH }}" > checksums.txt
+          shasum -a 256 "${{ env.ZIP_PATH }}" >> checksums.txt
+          cat checksums.txt
+
+      - name: 🎉 Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          name: ADB-Studio v${{ steps.version.outputs.VERSION }}
+          draft: false
+          prerelease: ${{ contains(github.ref, 'alpha') || contains(github.ref, 'beta') || contains(github.ref, 'rc') }}
+          generate_release_notes: true
+          files: |
+            ${{ env.DMG_PATH }}
+            ${{ env.ZIP_PATH }}
+            checksums.txt
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,0 +1,76 @@
+name: 🔍 CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  build:
+    name: 🔨 Build & Test
+    runs-on: macos-14
+
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+
+      - name: 🛠️ Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode_15.2.app/Contents/Developer
+
+      - name: 📋 Show Xcode version
+        run: xcodebuild -version
+
+      - name: 🏗️ Build
+        run: |
+          xcodebuild -scheme "ADB-Studio" \
+            -configuration Debug \
+            -destination "platform=macOS,arch=arm64" \
+            -derivedDataPath build \
+            clean build \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO
+
+      - name: 🧪 Run Tests
+        run: |
+          xcodebuild -scheme "ADB-Studio" \
+            -configuration Debug \
+            -destination "platform=macOS,arch=arm64" \
+            -derivedDataPath build \
+            test \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO
+        continue-on-error: true
+
+  swiftlint:
+    name: 🧹 SwiftLint
+    runs-on: macos-14
+
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+
+      - name: 📦 Install SwiftLint
+        run: brew install swiftlint
+
+      - name: 🔎 Run SwiftLint
+        run: swiftlint lint --reporter github-actions-logging
+        continue-on-error: true
+
+  swift-format:
+    name: 📐 Swift Format Check
+    runs-on: macos-14
+
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+
+      - name: 📦 Install swift-format
+        run: brew install swift-format
+
+      - name: 🔎 Check formatting
+        run: |
+          swift-format lint --recursive ADB-Studio/
+        continue-on-error: true

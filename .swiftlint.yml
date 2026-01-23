@@ -1,0 +1,46 @@
+included:
+  - ADB-Studio
+
+excluded:
+  - build
+  - .build
+  - DerivedData
+  - Pods
+
+disabled_rules:
+  - trailing_whitespace
+  - line_length
+  - identifier_name
+  - type_name
+  - function_body_length
+  - file_length
+  - cyclomatic_complexity
+  - nesting
+
+opt_in_rules:
+  - empty_count
+  - empty_string
+  - closure_spacing
+  - contains_over_first_not_nil
+  - discouraged_optional_boolean
+  - fallthrough
+  - first_where
+  - force_unwrapping
+  - implicitly_unwrapped_optional
+  - last_where
+  - modifier_order
+  - overridden_super_call
+  - private_action
+  - private_outlet
+  - redundant_nil_coalescing
+  - sorted_first_last
+  - toggle_bool
+  - unavailable_function
+  - unneeded_parentheses_in_closure_argument
+  - vertical_parameter_alignment_on_call
+  - yoda_condition
+
+force_cast: warning
+force_try: warning
+
+reporter: xcode
