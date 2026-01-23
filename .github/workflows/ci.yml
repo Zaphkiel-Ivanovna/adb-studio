@@ -9,14 +9,14 @@ on:
 jobs:
   build:
     name: 🔨 Build & Test
-    runs-on: macos-14
+    runs-on: macos-26
 
     steps:
       - name: 📥 Checkout
         uses: actions/checkout@v4
 
       - name: 🛠️ Select Xcode
-        run: sudo xcode-select -s /Applications/Xcode_15.2.app/Contents/Developer
+        run: sudo xcode-select -s /Applications/Xcode_26.0.app/Contents/Developer
 
       - name: 📋 Show Xcode version
         run: xcodebuild -version
@@ -46,7 +46,7 @@ jobs:
 
   swiftlint:
     name: 🧹 SwiftLint
-    runs-on: macos-14
+    runs-on: macos-26
 
     steps:
       - name: 📥 Checkout
@@ -61,7 +61,7 @@ jobs:
 
   swift-format:
     name: 📐 Swift Format Check
-    runs-on: macos-14
+    runs-on: macos-26
 
     steps:
       - name: 📥 Checkout
