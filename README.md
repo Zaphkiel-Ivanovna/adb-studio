@@ -1,5 +1,5 @@
 <p align="center">
-  <img src=".github/assets/app-icon.png" alt="ADB Studio" width="256" height="256">
+  <img src=".github/assets/app-icon.jpg" alt="ADB Studio" width="1355" >
 </p>
 
 <h1 align="center">ADB Studio</h1>

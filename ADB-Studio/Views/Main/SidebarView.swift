@@ -6,56 +6,89 @@ struct SidebarView: View {
     @Binding var showWiFiConnectionSheet: Bool
 
     var body: some View {
+        Group {
+            if deviceManager.devices.isEmpty {
+                emptyStateView
+            } else {
+                deviceListView
+            }
+        }
+        .navigationTitle("ADB Studio")
+    }
+
+    private var deviceListView: some View {
         List(selection: $selectedDeviceId) {
-            Section("Devices") {
-                if deviceManager.devices.isEmpty {
-                    if deviceManager.isRefreshing {
-                        HStack {
-                            ProgressView()
-                                .controlSize(.small)
-                            Text("Scanning...")
-                                .foregroundColor(.secondary)
+            Section {
+                ForEach(deviceManager.devices) { device in
+                    DeviceRowView(device: device)
+                        .tag(device.id)
+                        .listRowInsets(EdgeInsets(top: 4, leading: 8, bottom: 4, trailing: 8))
+                        .contextMenu {
+                            if device.connection.isWiFiBased {
+                                Button("Disconnect") {
+                                    Task {
+                                        try? await deviceManager.disconnect(from: device)
+                                        if selectedDeviceId == device.id {
+                                            selectedDeviceId = nil
+                                        }
+                                    }
+                                }
+                            }
                         }
-                    } else {
-                        Text("No devices connected")
-                            .foregroundColor(.secondary)
-                            .italic()
-                    }
-                } else {
-                    ForEach(deviceManager.devices) { device in
-                        SidebarDeviceRow(device: device)
-                            .tag(device.id)
-                    }
                 }
+            } header: {
+                Text("Devices")
+                    .padding(.bottom, 4)
             }
         }
         .listStyle(.sidebar)
-        .navigationTitle("ADB Studio")
     }
-}
 
-struct SidebarDeviceRow: View {
-    let device: Device
+    private var emptyStateView: some View {
+        VStack(spacing: 20) {
+            Spacer()
 
-    var body: some View {
-        HStack(spacing: 8) {
-            Image(systemName: device.connection.type == .wifi ? "wifi" : "cable.connector")
-                .font(.system(size: 12))
-                .foregroundColor(device.state == .device ? .green : .secondary)
-                .frame(width: 16)
+            if deviceManager.isRefreshing {
+                ProgressView()
+                    .controlSize(.large)
+                Text("Scanning for devices...")
+                    .font(.headline)
+                    .foregroundColor(.secondary)
+            } else {
+                Image(systemName: "antenna.radiowaves.left.and.right.slash")
+                    .font(.system(size: 48))
+                    .foregroundColor(.secondary)
 
-            VStack(alignment: .leading, spacing: 2) {
-                Text(device.displayName)
-                    .font(.system(size: 12, weight: .medium))
-                    .lineLimit(1)
-                    .truncationMode(.middle)
+                Text("No Devices Found")
+                    .font(.title3)
+                    .fontWeight(.medium)
 
-                Text(device.state.displayName)
-                    .font(.system(size: 10))
-                    .foregroundColor(device.state == .device ? .secondary : .orange)
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("To connect a device:")
+                        .fontWeight(.medium)
+
+                    VStack(alignment: .leading, spacing: 6) {
+                        Label("Enable USB debugging on your device", systemImage: "1.circle")
+                        Label("Connect via USB cable", systemImage: "2.circle")
+                        Label("Or connect via WiFi", systemImage: "3.circle")
+                    }
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+                }
+                .padding()
+                .background(Color(NSColor.controlBackgroundColor))
+                .cornerRadius(12)
+
+                Button(action: { showWiFiConnectionSheet = true }) {
+                    Label("Connect via WiFi", systemImage: "wifi")
+                }
+                .buttonStyle(.borderedProminent)
             }
+
+            Spacer()
         }
-        .padding(.vertical, 3)
+        .frame(maxWidth: .infinity)
+        .padding()
     }
 }
 

@@ -5,18 +5,14 @@ struct ContentView: View {
     @EnvironmentObject private var deviceManager: DeviceManager
     @State private var selectedDeviceId: String?
     @State private var showWiFiConnectionSheet = false
-    @State private var columnVisibility = NavigationSplitViewVisibility.all
 
     var body: some View {
-        NavigationSplitView(columnVisibility: $columnVisibility) {
+        NavigationSplitView {
             SidebarView(
                 selectedDeviceId: $selectedDeviceId,
                 showWiFiConnectionSheet: $showWiFiConnectionSheet
             )
-            .navigationSplitViewColumnWidth(min: 180, ideal: 200, max: 250)
-        } content: {
-            DeviceListView(selectedDeviceId: $selectedDeviceId)
-                .navigationSplitViewColumnWidth(min: 280, ideal: 320, max: 400)
+            .navigationSplitViewColumnWidth(min: 280, ideal: 320, max: 380)
         } detail: {
             if let deviceId = selectedDeviceId,
                let device = deviceManager.device(withId: deviceId) {
@@ -33,6 +29,11 @@ struct ContentView: View {
         .navigationSplitViewStyle(.balanced)
         .toolbar {
             ToolbarItemGroup(placement: .primaryAction) {
+                SettingsLink {
+                    Image(systemName: "gearshape")
+                }
+                .help("Settings")
+
                 Button(action: {
                     showWiFiConnectionSheet = true
                 }) {

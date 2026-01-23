@@ -68,10 +68,6 @@ struct DeviceRowView: View {
             }
 
             Spacer(minLength: 4)
-
-            Image(systemName: "chevron.right")
-                .font(.system(size: 11))
-                .foregroundColor(.secondary.opacity(0.5))
         }
         .padding(.vertical, 8)
         .padding(.horizontal, 8)
