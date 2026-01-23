@@ -37,6 +37,10 @@ struct ADB_StudioApp: App {
                 .keyboardShortcut("k", modifiers: .command)
             }
         }
+
+        Settings {
+            SettingsView(settingsStore: container.settingsStore)
+        }
     }
 }
 

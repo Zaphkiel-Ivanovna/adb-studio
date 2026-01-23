@@ -127,10 +127,13 @@ struct WiFiConnectionSheet: View {
 }
 
 #Preview {
-    WiFiConnectionSheet()
+    let settingsStore = SettingsStore()
+    let adbService = ADBServiceImpl(settingsStore: settingsStore)
+    return WiFiConnectionSheet()
         .environmentObject(DeviceManager(
-            adbService: ADBServiceImpl(),
-            deviceIdentifier: DeviceIdentifier(adbService: ADBServiceImpl()),
-            historyStore: DeviceHistoryStore()
+            adbService: adbService,
+            deviceIdentifier: DeviceIdentifier(adbService: adbService),
+            historyStore: DeviceHistoryStore(),
+            settingsStore: settingsStore
         ))
 }

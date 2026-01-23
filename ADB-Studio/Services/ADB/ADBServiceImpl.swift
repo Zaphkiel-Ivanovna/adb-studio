@@ -2,17 +2,22 @@ import Foundation
 
 final class ADBServiceImpl: ADBService {
     private let shell: ShellExecuting
-    private var adbPath: String?
+    private let settingsStore: SettingsStore
+    private var cachedADBPath: String?
 
-    init(shell: ShellExecuting = ShellExecutor()) {
+    init(shell: ShellExecuting = ShellExecutor(), settingsStore: SettingsStore) {
         self.shell = shell
-        self.adbPath = ShellExecutor.findADBPath()
+        self.settingsStore = settingsStore
+        self.cachedADBPath = ShellExecutor.findADBPath()
     }
 
     private func getADBPath() throws -> String {
-        if let path = adbPath { return path }
+        if let customPath = settingsStore.settings.effectiveADBPath {
+            return customPath
+        }
+        if let path = cachedADBPath { return path }
         if let path = ShellExecutor.findADBPath() {
-            adbPath = path
+            cachedADBPath = path
             return path
         }
         throw ADBError.adbNotFound

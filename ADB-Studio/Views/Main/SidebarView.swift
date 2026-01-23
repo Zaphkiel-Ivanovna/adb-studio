@@ -60,13 +60,16 @@ struct SidebarDeviceRow: View {
 }
 
 #Preview {
-    SidebarView(
+    let settingsStore = SettingsStore()
+    let adbService = ADBServiceImpl(settingsStore: settingsStore)
+    return SidebarView(
         selectedDeviceId: .constant(nil),
         showWiFiConnectionSheet: .constant(false)
     )
     .environmentObject(DeviceManager(
-        adbService: ADBServiceImpl(),
-        deviceIdentifier: DeviceIdentifier(adbService: ADBServiceImpl()),
-        historyStore: DeviceHistoryStore()
+        adbService: adbService,
+        deviceIdentifier: DeviceIdentifier(adbService: adbService),
+        historyStore: DeviceHistoryStore(),
+        settingsStore: settingsStore
     ))
 }

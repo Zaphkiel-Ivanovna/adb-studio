@@ -14,6 +14,9 @@
 		E00000010000000000000005 /* PortForward.swift in Sources */ = {isa = PBXBuildFile; fileRef = E00000020000000000000005 /* PortForward.swift */; };
 		E00000010000000000000006 /* DeviceHistory.swift in Sources */ = {isa = PBXBuildFile; fileRef = E00000020000000000000006 /* DeviceHistory.swift */; };
 		E00000010000000000000007 /* ADBError.swift in Sources */ = {isa = PBXBuildFile; fileRef = E00000020000000000000007 /* ADBError.swift */; };
+		E00000010000000000000031 /* AppSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = E00000020000000000000031 /* AppSettings.swift */; };
+		E00000010000000000000032 /* SettingsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = E00000020000000000000032 /* SettingsStore.swift */; };
+		E00000010000000000000033 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E00000020000000000000033 /* SettingsView.swift */; };
 		E00000010000000000000008 /* ADBService.swift in Sources */ = {isa = PBXBuildFile; fileRef = E00000020000000000000008 /* ADBService.swift */; };
 		E00000010000000000000009 /* ADBServiceImpl.swift in Sources */ = {isa = PBXBuildFile; fileRef = E00000020000000000000009 /* ADBServiceImpl.swift */; };
 		E00000010000000000000010 /* ADBOutputParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = E00000020000000000000010 /* ADBOutputParser.swift */; };
@@ -67,6 +70,9 @@
 		E00000020000000000000028 /* ToolsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToolsView.swift; sourceTree = "<group>"; };
 		E00000020000000000000029 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		E00000020000000000000030 /* ADB_Studio.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ADB_Studio.entitlements; sourceTree = "<group>"; };
+		E00000020000000000000031 /* AppSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSettings.swift; sourceTree = "<group>"; };
+		E00000020000000000000032 /* SettingsStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsStore.swift; sourceTree = "<group>"; };
+		E00000020000000000000033 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		E00000030000000000000001 /* ADB-Studio.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "ADB-Studio.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -128,6 +134,7 @@
 				E00000020000000000000005 /* PortForward.swift */,
 				E00000020000000000000006 /* DeviceHistory.swift */,
 				E00000020000000000000007 /* ADBError.swift */,
+				E00000020000000000000031 /* AppSettings.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -161,6 +168,7 @@
 				E00000050000000000000017 /* Connection */,
 				E00000050000000000000018 /* PortForward */,
 				E00000050000000000000019 /* Tools */,
+				E00000050000000000000020 /* Settings */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -196,6 +204,7 @@
 			isa = PBXGroup;
 			children = (
 				E00000020000000000000014 /* DeviceHistoryStore.swift */,
+				E00000020000000000000032 /* SettingsStore.swift */,
 			);
 			path = Persistence;
 			sourceTree = "<group>";
@@ -259,6 +268,14 @@
 				E00000020000000000000028 /* ToolsView.swift */,
 			);
 			path = Tools;
+			sourceTree = "<group>";
+		};
+		E00000050000000000000020 /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				E00000020000000000000033 /* SettingsView.swift */,
+			);
+			path = Settings;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -357,6 +374,9 @@
 				E00000010000000000000026 /* PortForwardView.swift in Sources */,
 				E00000010000000000000027 /* AddPortSheet.swift in Sources */,
 				E00000010000000000000028 /* ToolsView.swift in Sources */,
+				E00000010000000000000031 /* AppSettings.swift in Sources */,
+				E00000010000000000000032 /* SettingsStore.swift in Sources */,
+				E00000010000000000000033 /* SettingsView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -64,10 +64,13 @@ struct EmptyDeviceListView: View {
 }
 
 #Preview {
-    DeviceListView(selectedDeviceId: .constant(nil))
+    let settingsStore = SettingsStore()
+    let adbService = ADBServiceImpl(settingsStore: settingsStore)
+    return DeviceListView(selectedDeviceId: .constant(nil))
         .environmentObject(DeviceManager(
-            adbService: ADBServiceImpl(),
-            deviceIdentifier: DeviceIdentifier(adbService: ADBServiceImpl()),
-            historyStore: DeviceHistoryStore()
+            adbService: adbService,
+            deviceIdentifier: DeviceIdentifier(adbService: adbService),
+            historyStore: DeviceHistoryStore(),
+            settingsStore: settingsStore
         ))
 }

@@ -168,7 +168,9 @@ struct DeviceStateMessageView: View {
 }
 
 #Preview {
-    DeviceDetailView(
+    let settingsStore = SettingsStore()
+    let adbService = ADBServiceImpl(settingsStore: settingsStore)
+    return DeviceDetailView(
         device: Device(
             adbId: "192.168.1.100:5555",
             persistentSerial: "ABC123",
@@ -179,12 +181,13 @@ struct DeviceStateMessageView: View {
             androidVersion: "14",
             sdkVersion: "34"
         ),
-        adbService: ADBServiceImpl(),
-        screenshotService: ScreenshotService(adbService: ADBServiceImpl()),
+        adbService: adbService,
+        screenshotService: ScreenshotService(adbService: adbService),
         deviceManager: DeviceManager(
-            adbService: ADBServiceImpl(),
-            deviceIdentifier: DeviceIdentifier(adbService: ADBServiceImpl()),
-            historyStore: DeviceHistoryStore()
+            adbService: adbService,
+            deviceIdentifier: DeviceIdentifier(adbService: adbService),
+            historyStore: DeviceHistoryStore(),
+            settingsStore: settingsStore
         )
     )
 }

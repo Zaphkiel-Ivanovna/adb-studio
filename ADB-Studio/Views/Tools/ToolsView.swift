@@ -227,18 +227,21 @@ struct TcpipSection: View {
 }
 
 #Preview {
-    ToolsView(viewModel: DeviceDetailViewModel(
+    let settingsStore = SettingsStore()
+    let adbService = ADBServiceImpl(settingsStore: settingsStore)
+    return ToolsView(viewModel: DeviceDetailViewModel(
         device: Device(
             adbId: "test",
             connection: .usb(),
             state: .device
         ),
-        adbService: ADBServiceImpl(),
-        screenshotService: ScreenshotService(adbService: ADBServiceImpl()),
+        adbService: adbService,
+        screenshotService: ScreenshotService(adbService: adbService),
         deviceManager: DeviceManager(
-            adbService: ADBServiceImpl(),
-            deviceIdentifier: DeviceIdentifier(adbService: ADBServiceImpl()),
-            historyStore: DeviceHistoryStore()
+            adbService: adbService,
+            deviceIdentifier: DeviceIdentifier(adbService: adbService),
+            historyStore: DeviceHistoryStore(),
+            settingsStore: settingsStore
         )
     ))
     .padding()

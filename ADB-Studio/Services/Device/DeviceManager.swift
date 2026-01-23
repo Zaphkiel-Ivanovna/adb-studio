@@ -12,6 +12,7 @@ final class DeviceManager: ObservableObject {
     private let adbService: ADBService
     private let deviceIdentifier: DeviceIdentifier
     private let historyStore: DeviceHistoryStore
+    private var refreshInterval: TimeInterval
 
     private var refreshTask: Task<Void, Never>?
     private var autoRefreshTask: Task<Void, Never>?
@@ -19,22 +20,31 @@ final class DeviceManager: ObservableObject {
     init(
         adbService: ADBService,
         deviceIdentifier: DeviceIdentifier,
-        historyStore: DeviceHistoryStore
+        historyStore: DeviceHistoryStore,
+        settingsStore: SettingsStore
     ) {
         self.adbService = adbService
         self.deviceIdentifier = deviceIdentifier
         self.historyStore = historyStore
+        self.refreshInterval = settingsStore.settings.refreshInterval
     }
 
-    func startMonitoring(interval: TimeInterval = 3.0) {
+    func startMonitoring() {
         autoRefreshTask?.cancel()
         autoRefreshTask = Task {
             await checkADBAvailability()
 
             while !Task.isCancelled {
                 await refresh()
-                try? await Task.sleep(for: .seconds(interval))
+                try? await Task.sleep(for: .seconds(refreshInterval))
             }
+        }
+    }
+
+    func updateRefreshInterval(_ interval: TimeInterval) {
+        refreshInterval = interval
+        if autoRefreshTask != nil {
+            startMonitoring()
         }
     }
 
