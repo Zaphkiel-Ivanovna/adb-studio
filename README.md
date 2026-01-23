@@ -2,20 +2,18 @@
   <img src=".github/assets/app-icon.jpg" alt="ADB Studio" width="1355" >
 </p>
 
-<h1 align="center">ADB Studio</h1>
-
 <p align="center">
   A beautiful, native macOS app for managing Android devices via ADB.
 </p>
 
 <p align="center">
-  <a href="https://github.com/Music-Player-GO/adb-studio/releases">
+  <a href="https://github.com/Zaphkiel-Ivanovna/adb-studio/releases">
     <img src="https://img.shields.io/github/v/release/Music-Player-GO/adb-studio?style=for-the-badge&labelColor=000000" alt="Release">
   </a>
-  <a href="https://github.com/Music-Player-GO/adb-studio/blob/main/LICENSE">
+  <a href="https://github.com/Zaphkiel-Ivanovna/adb-studio/blob/main/LICENSE">
     <img src="https://img.shields.io/github/license/Music-Player-GO/adb-studio?style=for-the-badge&labelColor=000000" alt="License">
   </a>
-  <a href="https://github.com/Music-Player-GO/adb-studio/stargazers">
+  <a href="https://github.com/Zaphkiel-Ivanovna/adb-studio/stargazers">
     <img src="https://img.shields.io/github/stars/Music-Player-GO/adb-studio?style=for-the-badge&labelColor=000000" alt="Stars">
   </a>
 </p>
@@ -65,7 +63,7 @@ No more memorizing ADB commands or switching between terminal windows. ADB Studi
 
 ### Download
 
-Download the latest release from the [Releases](https://github.com/Music-Player-GO/adb-studio/releases) page:
+Download the latest release from the [Releases](https://github.com/Zaphkiel-Ivanovna/adb-studio/releases) page:
 
 - **DMG** — Drag to Applications folder
 - **ZIP** — Extract and move to Applications
@@ -74,7 +72,7 @@ Download the latest release from the [Releases](https://github.com/Music-Player-
 
 ```bash
 # Clone the repository
-git clone https://github.com/Music-Player-GO/adb-studio.git
+git clone https://github.com/Zaphkiel-Ivanovna/adb-studio.git
 cd adb-studio
 
 # Build with Xcode
@@ -189,5 +187,5 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ---
 
 <p align="center">
-  Made with ❤️ for Android developers on Mac
+  Made with ❤️ by Zaphkiel Ivanovna
 </p>
