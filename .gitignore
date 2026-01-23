@@ -1,0 +1,71 @@
+# Xcode
+build/
+DerivedData/
+*.xcuserstate
+*.xccheckout
+*.xcscmblueprint
+xcuserdata/
+
+# SwiftPM
+.build/
+.swiftpm/
+Package.resolved
+
+# CocoaPods
+Pods/
+*.xcworkspace
+
+# Carthage
+Carthage/Build/
+Carthage/Checkouts/
+
+# fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/**/*.png
+fastlane/test_output
+
+# Code Injection
+iOSInjectionProject/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Archives
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# Playgrounds
+timeline.xctimeline
+playground.xcworkspace
+
+# Instruments
+*.instrumentsprof
+
+# Profiling
+*.gcda
+*.gcno
+*.gcov
+
+# Env
+.env
+.env.*
+*.pem
+*.p12
+*.mobileprovision
+
+# IDE
+.idea/
+*.swp
+*.swo
+*~
+.vscode/
+
+# Distribution
+*.dmg
+*.zip
+*.pkg

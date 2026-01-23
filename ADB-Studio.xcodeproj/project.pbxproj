@@ -1,0 +1,562 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		E00000010000000000000001 /* ADB_StudioApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = E00000020000000000000001 /* ADB_StudioApp.swift */; };
+		E00000010000000000000002 /* DependencyContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = E00000020000000000000002 /* DependencyContainer.swift */; };
+		E00000010000000000000003 /* Device.swift in Sources */ = {isa = PBXBuildFile; fileRef = E00000020000000000000003 /* Device.swift */; };
+		E00000010000000000000004 /* DeviceConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = E00000020000000000000004 /* DeviceConnection.swift */; };
+		E00000010000000000000005 /* PortForward.swift in Sources */ = {isa = PBXBuildFile; fileRef = E00000020000000000000005 /* PortForward.swift */; };
+		E00000010000000000000006 /* DeviceHistory.swift in Sources */ = {isa = PBXBuildFile; fileRef = E00000020000000000000006 /* DeviceHistory.swift */; };
+		E00000010000000000000007 /* ADBError.swift in Sources */ = {isa = PBXBuildFile; fileRef = E00000020000000000000007 /* ADBError.swift */; };
+		E00000010000000000000008 /* ADBService.swift in Sources */ = {isa = PBXBuildFile; fileRef = E00000020000000000000008 /* ADBService.swift */; };
+		E00000010000000000000009 /* ADBServiceImpl.swift in Sources */ = {isa = PBXBuildFile; fileRef = E00000020000000000000009 /* ADBServiceImpl.swift */; };
+		E00000010000000000000010 /* ADBOutputParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = E00000020000000000000010 /* ADBOutputParser.swift */; };
+		E00000010000000000000011 /* DeviceManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E00000020000000000000011 /* DeviceManager.swift */; };
+		E00000010000000000000012 /* DeviceIdentifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = E00000020000000000000012 /* DeviceIdentifier.swift */; };
+		E00000010000000000000013 /* ScreenshotService.swift in Sources */ = {isa = PBXBuildFile; fileRef = E00000020000000000000013 /* ScreenshotService.swift */; };
+		E00000010000000000000014 /* DeviceHistoryStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = E00000020000000000000014 /* DeviceHistoryStore.swift */; };
+		E00000010000000000000015 /* ShellExecutor.swift in Sources */ = {isa = PBXBuildFile; fileRef = E00000020000000000000015 /* ShellExecutor.swift */; };
+		E00000010000000000000017 /* DeviceDetailViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E00000020000000000000017 /* DeviceDetailViewModel.swift */; };
+		E00000010000000000000018 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E00000020000000000000018 /* ContentView.swift */; };
+		E00000010000000000000019 /* SidebarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E00000020000000000000019 /* SidebarView.swift */; };
+		E00000010000000000000020 /* DeviceListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E00000020000000000000020 /* DeviceListView.swift */; };
+		E00000010000000000000021 /* DeviceRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E00000020000000000000021 /* DeviceRowView.swift */; };
+		E00000010000000000000022 /* DeviceStatusBadge.swift in Sources */ = {isa = PBXBuildFile; fileRef = E00000020000000000000022 /* DeviceStatusBadge.swift */; };
+		E00000010000000000000023 /* WiFiConnectionSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = E00000020000000000000023 /* WiFiConnectionSheet.swift */; };
+		E00000010000000000000024 /* DeviceDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E00000020000000000000024 /* DeviceDetailView.swift */; };
+		E00000010000000000000025 /* DeviceInfoSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = E00000020000000000000025 /* DeviceInfoSection.swift */; };
+		E00000010000000000000026 /* PortForwardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E00000020000000000000026 /* PortForwardView.swift */; };
+		E00000010000000000000027 /* AddPortSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = E00000020000000000000027 /* AddPortSheet.swift */; };
+		E00000010000000000000028 /* ToolsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E00000020000000000000028 /* ToolsView.swift */; };
+		E00000010000000000000029 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E00000020000000000000029 /* Assets.xcassets */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		E00000020000000000000001 /* ADB_StudioApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ADB_StudioApp.swift; sourceTree = "<group>"; };
+		E00000020000000000000002 /* DependencyContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DependencyContainer.swift; sourceTree = "<group>"; };
+		E00000020000000000000003 /* Device.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Device.swift; sourceTree = "<group>"; };
+		E00000020000000000000004 /* DeviceConnection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceConnection.swift; sourceTree = "<group>"; };
+		E00000020000000000000005 /* PortForward.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PortForward.swift; sourceTree = "<group>"; };
+		E00000020000000000000006 /* DeviceHistory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceHistory.swift; sourceTree = "<group>"; };
+		E00000020000000000000007 /* ADBError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ADBError.swift; sourceTree = "<group>"; };
+		E00000020000000000000008 /* ADBService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ADBService.swift; sourceTree = "<group>"; };
+		E00000020000000000000009 /* ADBServiceImpl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ADBServiceImpl.swift; sourceTree = "<group>"; };
+		E00000020000000000000010 /* ADBOutputParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ADBOutputParser.swift; sourceTree = "<group>"; };
+		E00000020000000000000011 /* DeviceManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceManager.swift; sourceTree = "<group>"; };
+		E00000020000000000000012 /* DeviceIdentifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceIdentifier.swift; sourceTree = "<group>"; };
+		E00000020000000000000013 /* ScreenshotService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenshotService.swift; sourceTree = "<group>"; };
+		E00000020000000000000014 /* DeviceHistoryStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceHistoryStore.swift; sourceTree = "<group>"; };
+		E00000020000000000000015 /* ShellExecutor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShellExecutor.swift; sourceTree = "<group>"; };
+		E00000020000000000000017 /* DeviceDetailViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceDetailViewModel.swift; sourceTree = "<group>"; };
+		E00000020000000000000018 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		E00000020000000000000019 /* SidebarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SidebarView.swift; sourceTree = "<group>"; };
+		E00000020000000000000020 /* DeviceListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceListView.swift; sourceTree = "<group>"; };
+		E00000020000000000000021 /* DeviceRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceRowView.swift; sourceTree = "<group>"; };
+		E00000020000000000000022 /* DeviceStatusBadge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceStatusBadge.swift; sourceTree = "<group>"; };
+		E00000020000000000000023 /* WiFiConnectionSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WiFiConnectionSheet.swift; sourceTree = "<group>"; };
+		E00000020000000000000024 /* DeviceDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceDetailView.swift; sourceTree = "<group>"; };
+		E00000020000000000000025 /* DeviceInfoSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceInfoSection.swift; sourceTree = "<group>"; };
+		E00000020000000000000026 /* PortForwardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PortForwardView.swift; sourceTree = "<group>"; };
+		E00000020000000000000027 /* AddPortSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddPortSheet.swift; sourceTree = "<group>"; };
+		E00000020000000000000028 /* ToolsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToolsView.swift; sourceTree = "<group>"; };
+		E00000020000000000000029 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		E00000020000000000000030 /* ADB_Studio.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ADB_Studio.entitlements; sourceTree = "<group>"; };
+		E00000030000000000000001 /* ADB-Studio.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "ADB-Studio.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		E00000040000000000000001 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		E00000050000000000000001 = {
+			isa = PBXGroup;
+			children = (
+				E00000050000000000000002 /* ADB-Studio */,
+				E00000050000000000000003 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		E00000050000000000000002 /* ADB-Studio */ = {
+			isa = PBXGroup;
+			children = (
+				E00000050000000000000004 /* App */,
+				E00000050000000000000005 /* Models */,
+				E00000050000000000000006 /* Services */,
+				E00000050000000000000007 /* ViewModels */,
+				E00000050000000000000008 /* Views */,
+				E00000020000000000000029 /* Assets.xcassets */,
+				E00000020000000000000030 /* ADB_Studio.entitlements */,
+			);
+			path = "ADB-Studio";
+			sourceTree = "<group>";
+		};
+		E00000050000000000000003 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				E00000030000000000000001 /* ADB-Studio.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		E00000050000000000000004 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				E00000020000000000000001 /* ADB_StudioApp.swift */,
+				E00000020000000000000002 /* DependencyContainer.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		E00000050000000000000005 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				E00000020000000000000003 /* Device.swift */,
+				E00000020000000000000004 /* DeviceConnection.swift */,
+				E00000020000000000000005 /* PortForward.swift */,
+				E00000020000000000000006 /* DeviceHistory.swift */,
+				E00000020000000000000007 /* ADBError.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		E00000050000000000000006 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				E00000050000000000000009 /* ADB */,
+				E00000050000000000000010 /* Device */,
+				E00000050000000000000011 /* Media */,
+				E00000050000000000000012 /* Persistence */,
+				E00000050000000000000013 /* Shell */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		E00000050000000000000007 /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				E00000020000000000000017 /* DeviceDetailViewModel.swift */,
+			);
+			path = ViewModels;
+			sourceTree = "<group>";
+		};
+		E00000050000000000000008 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				E00000050000000000000014 /* Main */,
+				E00000050000000000000015 /* DeviceList */,
+				E00000050000000000000016 /* DeviceDetail */,
+				E00000050000000000000017 /* Connection */,
+				E00000050000000000000018 /* PortForward */,
+				E00000050000000000000019 /* Tools */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		E00000050000000000000009 /* ADB */ = {
+			isa = PBXGroup;
+			children = (
+				E00000020000000000000008 /* ADBService.swift */,
+				E00000020000000000000009 /* ADBServiceImpl.swift */,
+				E00000020000000000000010 /* ADBOutputParser.swift */,
+			);
+			path = ADB;
+			sourceTree = "<group>";
+		};
+		E00000050000000000000010 /* Device */ = {
+			isa = PBXGroup;
+			children = (
+				E00000020000000000000011 /* DeviceManager.swift */,
+				E00000020000000000000012 /* DeviceIdentifier.swift */,
+			);
+			path = Device;
+			sourceTree = "<group>";
+		};
+		E00000050000000000000011 /* Media */ = {
+			isa = PBXGroup;
+			children = (
+				E00000020000000000000013 /* ScreenshotService.swift */,
+			);
+			path = Media;
+			sourceTree = "<group>";
+		};
+		E00000050000000000000012 /* Persistence */ = {
+			isa = PBXGroup;
+			children = (
+				E00000020000000000000014 /* DeviceHistoryStore.swift */,
+			);
+			path = Persistence;
+			sourceTree = "<group>";
+		};
+		E00000050000000000000013 /* Shell */ = {
+			isa = PBXGroup;
+			children = (
+				E00000020000000000000015 /* ShellExecutor.swift */,
+			);
+			path = Shell;
+			sourceTree = "<group>";
+		};
+		E00000050000000000000014 /* Main */ = {
+			isa = PBXGroup;
+			children = (
+				E00000020000000000000018 /* ContentView.swift */,
+				E00000020000000000000019 /* SidebarView.swift */,
+			);
+			path = Main;
+			sourceTree = "<group>";
+		};
+		E00000050000000000000015 /* DeviceList */ = {
+			isa = PBXGroup;
+			children = (
+				E00000020000000000000020 /* DeviceListView.swift */,
+				E00000020000000000000021 /* DeviceRowView.swift */,
+				E00000020000000000000022 /* DeviceStatusBadge.swift */,
+			);
+			path = DeviceList;
+			sourceTree = "<group>";
+		};
+		E00000050000000000000016 /* DeviceDetail */ = {
+			isa = PBXGroup;
+			children = (
+				E00000020000000000000024 /* DeviceDetailView.swift */,
+				E00000020000000000000025 /* DeviceInfoSection.swift */,
+			);
+			path = DeviceDetail;
+			sourceTree = "<group>";
+		};
+		E00000050000000000000017 /* Connection */ = {
+			isa = PBXGroup;
+			children = (
+				E00000020000000000000023 /* WiFiConnectionSheet.swift */,
+			);
+			path = Connection;
+			sourceTree = "<group>";
+		};
+		E00000050000000000000018 /* PortForward */ = {
+			isa = PBXGroup;
+			children = (
+				E00000020000000000000026 /* PortForwardView.swift */,
+				E00000020000000000000027 /* AddPortSheet.swift */,
+			);
+			path = PortForward;
+			sourceTree = "<group>";
+		};
+		E00000050000000000000019 /* Tools */ = {
+			isa = PBXGroup;
+			children = (
+				E00000020000000000000028 /* ToolsView.swift */,
+			);
+			path = Tools;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		E00000060000000000000001 /* ADB-Studio */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E00000070000000000000001 /* Build configuration list for PBXNativeTarget "ADB-Studio" */;
+			buildPhases = (
+				E00000080000000000000001 /* Sources */,
+				E00000040000000000000001 /* Frameworks */,
+				E00000090000000000000001 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "ADB-Studio";
+			productName = "ADB-Studio";
+			productReference = E00000030000000000000001 /* ADB-Studio.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		E000000A0000000000000001 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1500;
+				LastUpgradeCheck = 1500;
+				TargetAttributes = {
+					E00000060000000000000001 = {
+						CreatedOnToolsVersion = 15.0;
+					};
+				};
+			};
+			buildConfigurationList = E000000B0000000000000001 /* Build configuration list for PBXProject "ADB-Studio" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = E00000050000000000000001;
+			productRefGroup = E00000050000000000000003 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				E00000060000000000000001 /* ADB-Studio */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		E00000090000000000000001 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E00000010000000000000029 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		E00000080000000000000001 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E00000010000000000000001 /* ADB_StudioApp.swift in Sources */,
+				E00000010000000000000002 /* DependencyContainer.swift in Sources */,
+				E00000010000000000000003 /* Device.swift in Sources */,
+				E00000010000000000000004 /* DeviceConnection.swift in Sources */,
+				E00000010000000000000005 /* PortForward.swift in Sources */,
+				E00000010000000000000006 /* DeviceHistory.swift in Sources */,
+				E00000010000000000000007 /* ADBError.swift in Sources */,
+				E00000010000000000000008 /* ADBService.swift in Sources */,
+				E00000010000000000000009 /* ADBServiceImpl.swift in Sources */,
+				E00000010000000000000010 /* ADBOutputParser.swift in Sources */,
+				E00000010000000000000011 /* DeviceManager.swift in Sources */,
+				E00000010000000000000012 /* DeviceIdentifier.swift in Sources */,
+				E00000010000000000000013 /* ScreenshotService.swift in Sources */,
+				E00000010000000000000014 /* DeviceHistoryStore.swift in Sources */,
+				E00000010000000000000015 /* ShellExecutor.swift in Sources */,
+				E00000010000000000000017 /* DeviceDetailViewModel.swift in Sources */,
+				E00000010000000000000018 /* ContentView.swift in Sources */,
+				E00000010000000000000019 /* SidebarView.swift in Sources */,
+				E00000010000000000000020 /* DeviceListView.swift in Sources */,
+				E00000010000000000000021 /* DeviceRowView.swift in Sources */,
+				E00000010000000000000022 /* DeviceStatusBadge.swift in Sources */,
+				E00000010000000000000023 /* WiFiConnectionSheet.swift in Sources */,
+				E00000010000000000000024 /* DeviceDetailView.swift in Sources */,
+				E00000010000000000000025 /* DeviceInfoSection.swift in Sources */,
+				E00000010000000000000026 /* PortForwardView.swift in Sources */,
+				E00000010000000000000027 /* AddPortSheet.swift in Sources */,
+				E00000010000000000000028 /* ToolsView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		E000000C0000000000000001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		E000000C0000000000000002 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+			};
+			name = Release;
+		};
+		E000000D0000000000000001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "ADB-Studio/ADB_Studio.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "";
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.developer-tools";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = dev.zaphkiel.adbstudio;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		E000000D0000000000000002 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "ADB-Studio/ADB_Studio.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "";
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.developer-tools";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = dev.zaphkiel.adbstudio;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		E00000070000000000000001 /* Build configuration list for PBXNativeTarget "ADB-Studio" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E000000D0000000000000001 /* Debug */,
+				E000000D0000000000000002 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		E000000B0000000000000001 /* Build configuration list for PBXProject "ADB-Studio" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E000000C0000000000000001 /* Debug */,
+				E000000C0000000000000002 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = E000000A0000000000000001 /* Project object */;
+}

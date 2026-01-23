@@ -1,0 +1,190 @@
+import SwiftUI
+
+struct DeviceDetailView: View {
+    let device: Device
+    let adbService: ADBService
+    let screenshotService: ScreenshotService
+    let deviceManager: DeviceManager
+
+    @StateObject private var viewModel: DeviceDetailViewModel
+
+    init(device: Device, adbService: ADBService, screenshotService: ScreenshotService, deviceManager: DeviceManager) {
+        self.device = device
+        self.adbService = adbService
+        self.screenshotService = screenshotService
+        self.deviceManager = deviceManager
+        _viewModel = StateObject(wrappedValue: DeviceDetailViewModel(
+            device: device,
+            adbService: adbService,
+            screenshotService: screenshotService,
+            deviceManager: deviceManager
+        ))
+    }
+
+    var body: some View {
+        ScrollView {
+            VStack(spacing: 24) {
+                DeviceHeaderView(viewModel: viewModel)
+
+                if device.state == .device {
+                    DeviceInfoSection(device: viewModel.device)
+                    ToolsView(viewModel: viewModel)
+                    PortForwardView(viewModel: viewModel)
+                } else {
+                    DeviceStateMessageView(state: device.state)
+                }
+            }
+            .padding(24)
+        }
+        .navigationTitle(device.displayName)
+        .id(device.id)
+        .task(id: device.id) {
+            if device.state == .device {
+                await viewModel.loadPortForwards()
+            }
+        }
+        .onChange(of: device) { _, newDevice in
+            viewModel.updateDevice(newDevice)
+        }
+        .alert("Error", isPresented: .constant(viewModel.errorMessage != nil)) {
+            Button("OK") {
+                viewModel.errorMessage = nil
+            }
+        } message: {
+            if let error = viewModel.errorMessage {
+                Text(error)
+            }
+        }
+        .sheet(isPresented: $viewModel.showAddPortSheet) {
+            AddPortSheet(viewModel: viewModel)
+        }
+    }
+}
+
+struct DeviceHeaderView: View {
+    @ObservedObject var viewModel: DeviceDetailViewModel
+
+    var body: some View {
+        HStack(spacing: 16) {
+            ZStack {
+                RoundedRectangle(cornerRadius: 16)
+                    .fill(Color.green.opacity(0.15))
+                    .frame(width: 72, height: 72)
+
+                Image(systemName: "apps.iphone")
+                    .font(.system(size: 32))
+                    .foregroundColor(.green)
+            }
+
+            VStack(alignment: .leading, spacing: 4) {
+                if viewModel.isEditingName {
+                    HStack {
+                        TextField("Device name", text: $viewModel.editedName)
+                            .textFieldStyle(.roundedBorder)
+                            .frame(maxWidth: 200)
+
+                        Button(action: viewModel.saveName) {
+                            Image(systemName: "checkmark")
+                        }
+                        .buttonStyle(.borderedProminent)
+
+                        Button(action: viewModel.cancelEditingName) {
+                            Image(systemName: "xmark")
+                        }
+                        .buttonStyle(.bordered)
+                    }
+                } else {
+                    HStack {
+                        Text(viewModel.device.displayName)
+                            .font(.title)
+                            .fontWeight(.bold)
+
+                        Button(action: viewModel.startEditingName) {
+                            Image(systemName: "pencil")
+                                .font(.caption)
+                        }
+                        .buttonStyle(.plain)
+                        .foregroundColor(.secondary)
+                    }
+                }
+
+                Text(viewModel.device.fullDescription)
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+
+                HStack(spacing: 8) {
+                    DeviceStatusBadge(state: viewModel.device.state)
+
+                    Label(viewModel.device.connection.displayString, systemImage: viewModel.device.connection.type == .wifi ? "wifi" : "cable.connector")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+            }
+
+            Spacer()
+
+            if let message = viewModel.successMessage {
+                Text(message)
+                    .font(.caption)
+                    .foregroundColor(.green)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 6)
+                    .background(Color.green.opacity(0.15))
+                    .cornerRadius(8)
+            }
+        }
+        .padding()
+        .background(Color(NSColor.controlBackgroundColor))
+        .cornerRadius(12)
+    }
+}
+
+struct DeviceStateMessageView: View {
+    let state: DeviceState
+
+    var body: some View {
+        VStack(spacing: 16) {
+            Image(systemName: state == .unauthorized ? "lock.shield" : "antenna.radiowaves.left.and.right.slash")
+                .font(.system(size: 48))
+                .foregroundColor(.orange)
+
+            Text(state == .unauthorized ? "Device Unauthorized" : "Device Offline")
+                .font(.title2)
+                .fontWeight(.semibold)
+
+            Text(state == .unauthorized
+                 ? "Please accept the debugging authorization prompt on your device."
+                 : "The device appears to be offline. Please check the connection.")
+                .font(.subheadline)
+                .foregroundColor(.secondary)
+                .multilineTextAlignment(.center)
+                .frame(maxWidth: 300)
+        }
+        .padding(40)
+        .frame(maxWidth: .infinity)
+        .background(Color(NSColor.controlBackgroundColor))
+        .cornerRadius(12)
+    }
+}
+
+#Preview {
+    DeviceDetailView(
+        device: Device(
+            adbId: "192.168.1.100:5555",
+            persistentSerial: "ABC123",
+            connection: .wifi(ipAddress: "192.168.1.100", port: 5555),
+            state: .device,
+            model: "Pixel 6",
+            brand: "Google",
+            androidVersion: "14",
+            sdkVersion: "34"
+        ),
+        adbService: ADBServiceImpl(),
+        screenshotService: ScreenshotService(adbService: ADBServiceImpl()),
+        deviceManager: DeviceManager(
+            adbService: ADBServiceImpl(),
+            deviceIdentifier: DeviceIdentifier(adbService: ADBServiceImpl()),
+            historyStore: DeviceHistoryStore()
+        )
+    )
+}
