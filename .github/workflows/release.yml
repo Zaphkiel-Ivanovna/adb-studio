@@ -38,6 +38,10 @@ jobs:
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGNING_ALLOWED=NO
 
+      - name: 🔏 Ad-hoc Sign
+        run: |
+          codesign --force --deep --sign - "build/Build/Products/Release/ADB-Studio.app"
+
       - name: 💿 Create DMG
         run: |
           APP_NAME="ADB-Studio"

@@ -68,6 +68,10 @@ Download the latest release from the [Releases](https://github.com/Zaphkiel-Ivan
 - **DMG** — Drag to Applications folder
 - **ZIP** — Extract and move to Applications
 
+> **Note:** Since the app is not notarized, macOS may show a warning. To open it:
+> - Right-click the app → Open → Open, or
+> - Run `xattr -cr /Applications/ADB-Studio.app` in Terminal
+
 ### Build from Source
 
 ```bash
