@@ -4,8 +4,10 @@ struct WiFiConnectionSheet: View {
     @EnvironmentObject private var deviceManager: DeviceManager
     @Environment(\.dismiss) private var dismiss
 
+    let settingsStore: SettingsStore
+
     @State private var ipAddress = ""
-    @State private var port = "5555"
+    @State private var port = ""
     @State private var connectionError: String?
     @State private var isConnecting = false
 
@@ -88,6 +90,9 @@ struct WiFiConnectionSheet: View {
         .onSubmit {
             Task { await connect() }
         }
+        .onAppear {
+            port = String(settingsStore.settings.defaultTcpipPort)
+        }
     }
 
     private var connectionAddress: String {
@@ -129,7 +134,7 @@ struct WiFiConnectionSheet: View {
 #Preview {
     let settingsStore = SettingsStore()
     let adbService = ADBServiceImpl(settingsStore: settingsStore)
-    return WiFiConnectionSheet()
+    return WiFiConnectionSheet(settingsStore: settingsStore)
         .environmentObject(DeviceManager(
             adbService: adbService,
             deviceIdentifier: DeviceIdentifier(adbService: adbService),

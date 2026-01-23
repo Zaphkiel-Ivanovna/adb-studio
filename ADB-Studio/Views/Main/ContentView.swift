@@ -62,7 +62,7 @@ struct ContentView: View {
             showWiFiConnectionSheet = true
         }
         .sheet(isPresented: $showWiFiConnectionSheet) {
-            WiFiConnectionSheet()
+            WiFiConnectionSheet(settingsStore: container.settingsStore)
         }
         .alert("ADB Not Found", isPresented: .constant(deviceManager.hasCheckedADB && !deviceManager.isADBAvailable)) {
             Button("OK") { }
