@@ -89,18 +89,21 @@ struct ContentView: View {
             Text("Please install Android SDK platform-tools and ensure 'adb' is in your PATH.")
         }
         .onChange(of: container.updateService.updateAvailable) { _, available in
-            if available { showUpdateAlert = true }
+            if available && container.updateService.latestRelease != nil {
+                showUpdateAlert = true
+            }
         }
         .alert("Update Available", isPresented: $showUpdateAlert) {
             if let dmgUrl = container.updateService.latestRelease?.dmgDownloadUrl,
-               let url = URL(string: dmgUrl) {
+               let url = URL(string: dmgUrl),
+               container.updateService.isDownloadURLTrusted(dmgUrl) {
                 Button("Download Update") {
                     NSWorkspace.shared.open(url)
                 }
             }
-            Button("View on GitHub") {
-                if let htmlUrl = container.updateService.latestRelease?.htmlUrl,
-                   let url = URL(string: htmlUrl) {
+            if let htmlUrl = container.updateService.latestRelease?.htmlUrl,
+               let url = URL(string: htmlUrl) {
+                Button("View on GitHub") {
                     NSWorkspace.shared.open(url)
                 }
             }
@@ -132,6 +135,8 @@ struct EmptyDetailView: View {
 }
 
 #Preview {
+    let container = DependencyContainer()
     ContentView()
-        .environmentObject(DependencyContainer())
+        .environmentObject(container)
+        .environmentObject(container.deviceManager)
 }

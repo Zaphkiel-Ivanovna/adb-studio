@@ -245,35 +245,73 @@ struct ADBSettingsTab: View {
 
 struct NetworkSettingsTab: View {
     @ObservedObject var settingsStore: SettingsStore
+    @State private var portText: String = ""
+    @State private var portError: String?
+
+    private let validPortRange = 1024...65535
 
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
             SettingsSection(title: "TCP/IP CONNECTION") {
-                SettingsRow(
-                    title: "Default port",
-                    description: "Port used when connecting to devices over WiFi"
-                ) {
-                    TextField("5555", text: Binding(
-                        get: { String(settingsStore.settings.defaultTcpipPort) },
-                        set: {
-                            if let port = Int($0) {
-                                settingsStore.update { $0.defaultTcpipPort = port }
+                VStack(alignment: .leading, spacing: 8) {
+                    SettingsRow(
+                        title: "Default port",
+                        description: "Port used when connecting to devices over WiFi (1024-65535)"
+                    ) {
+                        TextField("5555", text: $portText)
+                            .textFieldStyle(.roundedBorder)
+                            .frame(width: 80)
+                            .multilineTextAlignment(.center)
+                            .onChange(of: portText) { _, newValue in
+                                validateAndUpdatePort(newValue)
                             }
-                        }
-                    ))
-                    .textFieldStyle(.roundedBorder)
-                    .frame(width: 80)
-                    .multilineTextAlignment(.center)
+                    }
+
+                    if let error = portError {
+                        Text(error)
+                            .font(.system(size: 11))
+                            .foregroundColor(.red)
+                    }
                 }
             }
         }
         .padding(24)
+        .onAppear {
+            portText = String(settingsStore.settings.defaultTcpipPort)
+        }
+    }
+
+    private func validateAndUpdatePort(_ value: String) {
+        // Allow empty field while typing
+        guard !value.isEmpty else {
+            portError = nil
+            return
+        }
+
+        // Check if it's a valid number
+        guard let port = Int(value) else {
+            portError = "Port must be a number"
+            return
+        }
+
+        // Check port range
+        guard validPortRange.contains(port) else {
+            portError = "Port must be between 1024 and 65535"
+            return
+        }
+
+        // Valid port - clear error and update
+        portError = nil
+        settingsStore.update { $0.defaultTcpipPort = port }
     }
 }
 
 // MARK: - About Tab
 
 struct AboutSettingsTab: View {
+    private static let githubURL = URL(string: "https://github.com/Zaphkiel-Ivanovna/adb-studio")
+    private static let kofiURL = URL(string: "https://ko-fi.com/T6T4E5BP6")
+
     var body: some View {
         VStack(spacing: 16) {
             Image(nsImage: NSApp.applicationIconImage)
@@ -295,17 +333,21 @@ struct AboutSettingsTab: View {
                 .fixedSize(horizontal: false, vertical: true)
 
             VStack(spacing: 12) {
-                Link(destination: URL(string: "https://github.com/Zaphkiel-Ivanovna/adb-studio")!) {
-                    Label("View on GitHub", systemImage: "link")
+                if let url = Self.githubURL {
+                    Link(destination: url) {
+                        Label("View on GitHub", systemImage: "link")
+                    }
+                    .buttonStyle(.plain)
+                    .foregroundColor(.accentColor)
                 }
-                .buttonStyle(.plain)
-                .foregroundColor(.accentColor)
 
-                Link(destination: URL(string: "https://ko-fi.com/T6T4E5BP6")!) {
-                    Label("Support on Ko-fi", systemImage: "heart.fill")
+                if let url = Self.kofiURL {
+                    Link(destination: url) {
+                        Label("Support on Ko-fi", systemImage: "heart.fill")
+                    }
+                    .buttonStyle(.plain)
+                    .foregroundColor(.pink)
                 }
-                .buttonStyle(.plain)
-                .foregroundColor(.pink)
             }
             .padding(.top, 8)
 
