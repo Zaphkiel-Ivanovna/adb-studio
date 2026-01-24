@@ -344,4 +344,145 @@ final class ADBServiceImpl: ADBService {
         }
         return "Unknown installation error"
     }
+
+    // MARK: - App Management
+
+    /// Validates that a package name follows Android naming conventions
+    /// Prevents command injection via malformed package names
+    private func validatePackageName(_ packageName: String) throws {
+        // Android package names: letters, digits, underscores, dots
+        // Must start with a letter, minimum 2 segments separated by dots
+        let pattern = "^[a-zA-Z][a-zA-Z0-9_]*(\\.[a-zA-Z][a-zA-Z0-9_]*)+$"
+        guard let regex = try? NSRegularExpression(pattern: pattern),
+              regex.firstMatch(in: packageName, range: NSRange(packageName.startIndex..., in: packageName)) != nil,
+              packageName.count <= 255 else {
+            throw ADBError.appNotFound(packageName)
+        }
+    }
+
+    func listPackages(deviceId: String, filter: AppListFilter) async throws -> [String] {
+        var args = ["pm", "list", "packages"]
+
+        switch filter {
+        case .all:
+            break
+        case .thirdParty:
+            args.append("-3")
+        case .system:
+            args.append("-s")
+        case .disabled:
+            args.append("-d")
+        }
+
+        let result = try await adb(deviceId: deviceId, ["shell"] + args)
+        if !result.isSuccess {
+            throw ADBError.commandFailed("pm list packages", result.exitCode)
+        }
+
+        return ADBOutputParser.parsePackageList(result.output)
+    }
+
+    func getPackageInfo(packageName: String, deviceId: String) async throws -> InstalledApp {
+        try validatePackageName(packageName)
+        let result = try await adb(deviceId: deviceId, ["shell", "dumpsys", "package", packageName], timeout: 10)
+        if !result.isSuccess {
+            throw ADBError.commandFailed("dumpsys package \(packageName)", result.exitCode)
+        }
+
+        if result.output.contains("Unable to find package:") {
+            throw ADBError.appNotFound(packageName)
+        }
+
+        return ADBOutputParser.parsePackageInfo(result.output, packageName: packageName)
+    }
+
+    func launchApp(packageName: String, deviceId: String) async throws {
+        try validatePackageName(packageName)
+        let result = try await adb(deviceId: deviceId, ["shell", "monkey", "-p", packageName, "-c", "android.intent.category.LAUNCHER", "1"])
+
+        if !result.isSuccess || result.output.contains("No activities found") {
+            throw ADBError.appActionFailed("Launch", "No launchable activity found for \(packageName)")
+        }
+    }
+
+    func forceStopApp(packageName: String, deviceId: String) async throws {
+        try validatePackageName(packageName)
+        let result = try await adb(deviceId: deviceId, ["shell", "am", "force-stop", packageName])
+        if !result.isSuccess {
+            throw ADBError.appActionFailed("Force Stop", result.combinedOutput)
+        }
+    }
+
+    func uninstallApp(packageName: String, keepData: Bool, deviceId: String) async throws {
+        try validatePackageName(packageName)
+        var args = ["uninstall"]
+        if keepData {
+            args.append("-k")
+        }
+        args.append(packageName)
+
+        let result = try await adb(deviceId: deviceId, args, timeout: 60)
+
+        if result.output.contains("Success") {
+            return
+        }
+
+        if result.output.contains("Failure") || result.errorOutput.contains("Failure") {
+            let message = result.combinedOutput.contains("[DELETE_FAILED_INTERNAL_ERROR]")
+                ? "Cannot uninstall system app"
+                : result.combinedOutput
+            throw ADBError.uninstallFailed(message)
+        }
+
+        if !result.isSuccess {
+            throw ADBError.uninstallFailed(result.combinedOutput)
+        }
+    }
+
+    func disableApp(packageName: String, deviceId: String) async throws {
+        try validatePackageName(packageName)
+        let result = try await adb(deviceId: deviceId, ["shell", "pm", "disable-user", "--user", "0", packageName])
+
+        if result.output.contains("disabled") {
+            return
+        }
+
+        if result.output.contains("Error") || result.output.contains("Exception") {
+            throw ADBError.appActionFailed("Disable", result.output)
+        }
+
+        if !result.isSuccess {
+            throw ADBError.appActionFailed("Disable", result.combinedOutput)
+        }
+    }
+
+    func enableApp(packageName: String, deviceId: String) async throws {
+        try validatePackageName(packageName)
+        let result = try await adb(deviceId: deviceId, ["shell", "pm", "enable", packageName])
+
+        if result.output.contains("enabled") {
+            return
+        }
+
+        if result.output.contains("Error") || result.output.contains("Exception") {
+            throw ADBError.appActionFailed("Enable", result.output)
+        }
+
+        if !result.isSuccess {
+            throw ADBError.appActionFailed("Enable", result.combinedOutput)
+        }
+    }
+
+    func openAppSettings(packageName: String, deviceId: String) async throws {
+        try validatePackageName(packageName)
+        let result = try await adb(deviceId: deviceId, [
+            "shell", "am", "start",
+            "-a", "android.settings.APPLICATION_DETAILS_SETTINGS",
+            "-d", "package:\(packageName)"
+        ])
+
+        if !result.isSuccess {
+            throw ADBError.appActionFailed("Open Settings", result.combinedOutput)
+        }
+    }
 }

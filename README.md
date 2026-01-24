@@ -61,6 +61,7 @@ No more memorizing ADB commands or switching between terminal windows. ADB Studi
 - **USB & WiFi Support** — Connect devices via USB cable or wirelessly over your local network
 - **One-Click Pairing** — Pair new devices for wireless debugging with just a few clicks
 - **APK Installation** — Drag & drop APK files to install apps directly on your device
+- **App Management** — View, launch, disable, and uninstall installed apps on your device
 - **Screenshot Capture** — Take screenshots instantly and copy to clipboard or save to Downloads
 - **Text Input** — Send text directly to your Android device from your Mac keyboard
 - **Quick Actions** — Back, Home, Menu, and Enter buttons for rapid navigation
@@ -125,13 +126,14 @@ open ADB-Studio.xcodeproj
 
 ### Tools
 
-| Tool              | Description                                       |
-| ----------------- | ------------------------------------------------- |
-| **Screenshot**    | Capture device screen to clipboard or save as PNG |
-| **Send Text**     | Type on your Mac, send to Android device          |
-| **Quick Actions** | Back, Home, Menu, Enter buttons                   |
-| **TCP/IP Mode**   | Enable wireless debugging via USB                 |
-| **Install APK**   | Drag & drop or select APK files to install        |
+| Tool              | Description                                        |
+| ----------------- | -------------------------------------------------- |
+| **Screenshot**    | Capture device screen to clipboard or save as PNG  |
+| **Send Text**     | Type on your Mac, send to Android device           |
+| **Quick Actions** | Back, Home, Menu, Enter buttons                    |
+| **TCP/IP Mode**   | Enable wireless debugging via USB                  |
+| **Install APK**   | Drag & drop or select APK files to install         |
+| **Manage Apps**   | Browse, search, and manage installed applications  |
 
 ### Port Forwarding
 
@@ -151,6 +153,24 @@ Install apps directly from your Mac:
 2. **Drag & drop** an APK file onto the drop zone, or **click** to open a file picker
 3. The installation progress is displayed in real-time
 4. Cancel anytime if needed — the installation process will be terminated
+
+### App Management
+
+View and manage all installed applications on your device:
+
+1. Select a connected device
+2. Expand the **Installed Apps** section
+3. Use the filter to show: **User Apps**, **System**, **All**, or **Disabled**
+4. Search apps by name or package name
+5. Click the **...** menu on any app to:
+   - **Launch** — Open the app on device
+   - **Force Stop** — Stop the running app
+   - **Uninstall** — Remove the app (with confirmation)
+   - **Uninstall (Keep Data)** — Remove app but preserve data
+   - **Disable/Enable** — Toggle app without uninstalling
+   - **App Settings** — Open Android settings for this app
+
+> **Note:** System apps cannot be uninstalled but can be disabled.
 
 ## Keyboard Shortcuts
 
@@ -179,6 +199,7 @@ ADB-Studio/
 │   ├── Device.swift              # Device model
 │   ├── DeviceConnection.swift    # Connection types
 │   ├── PortForward.swift         # Port forwarding
+│   ├── InstalledApp.swift        # Installed app model
 │   └── ADBError.swift            # Error types
 ├── Services/
 │   ├── ADB/                      # ADB command execution
@@ -187,7 +208,8 @@ ADB-Studio/
 │   ├── Media/                    # Screenshot service
 │   └── Shell/                    # Process execution
 ├── ViewModels/
-│   └── DeviceDetailViewModel.swift
+│   ├── DeviceDetailViewModel.swift
+│   └── InstalledAppsViewModel.swift
 └── Views/
     ├── Main/                     # Main window views
     ├── DeviceList/               # Device list components
@@ -195,6 +217,7 @@ ADB-Studio/
     ├── Connection/               # WiFi connection sheet
     ├── PortForward/              # Port forwarding views
     ├── APKInstaller/             # APK installation views
+    ├── InstalledApps/            # App management views
     ├── Tools/                    # Device tools
     └── Settings/                 # App settings
 ```

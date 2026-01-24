@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		7C92DA4E342DC74D3E9C4A56 /* InstalledAppRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21ED6789435F967A7C9B60DE /* InstalledAppRow.swift */; };
+		B4A0E97B24E46EEBF0EF6620 /* InstalledAppsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1CA7078B945077C30D30D25 /* InstalledAppsViewModel.swift */; };
+		D33D7E38DA7214CCE1AF2FE7 /* InstalledApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55A8D4C81788B3278F7D5F24 /* InstalledApp.swift */; };
 		E00000010000000000000001 /* ADB_StudioApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = E00000020000000000000001 /* ADB_StudioApp.swift */; };
 		E00000010000000000000002 /* DependencyContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = E00000020000000000000002 /* DependencyContainer.swift */; };
 		E00000010000000000000003 /* Device.swift in Sources */ = {isa = PBXBuildFile; fileRef = E00000020000000000000003 /* Device.swift */; };
@@ -43,9 +46,14 @@
 		E00000010000000000000036 /* UpdateService.swift in Sources */ = {isa = PBXBuildFile; fileRef = E00000020000000000000036 /* UpdateService.swift */; };
 		E00000010000000000000037 /* GitHubRelease.swift in Sources */ = {isa = PBXBuildFile; fileRef = E00000020000000000000037 /* GitHubRelease.swift */; };
 		E00000010000000000000038 /* APKInstallerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E00000020000000000000038 /* APKInstallerView.swift */; };
+		FCC1383DCF24102D2B126FD5 /* InstalledAppsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CED2523D7F78C0B0CCE9EF28 /* InstalledAppsView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		21ED6789435F967A7C9B60DE /* InstalledAppRow.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = InstalledAppRow.swift; sourceTree = "<group>"; };
+		55A8D4C81788B3278F7D5F24 /* InstalledApp.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = InstalledApp.swift; sourceTree = "<group>"; };
+		CED2523D7F78C0B0CCE9EF28 /* InstalledAppsView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = InstalledAppsView.swift; sourceTree = "<group>"; };
+		D1CA7078B945077C30D30D25 /* InstalledAppsViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = InstalledAppsViewModel.swift; sourceTree = "<group>"; };
 		E00000020000000000000001 /* ADB_StudioApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ADB_StudioApp.swift; sourceTree = "<group>"; };
 		E00000020000000000000002 /* DependencyContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DependencyContainer.swift; sourceTree = "<group>"; };
 		E00000020000000000000003 /* Device.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Device.swift; sourceTree = "<group>"; };
@@ -97,6 +105,16 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		2F9061625562A1D737FE9880 /* InstalledApps */ = {
+			isa = PBXGroup;
+			children = (
+				CED2523D7F78C0B0CCE9EF28 /* InstalledAppsView.swift */,
+				21ED6789435F967A7C9B60DE /* InstalledAppRow.swift */,
+			);
+			name = InstalledApps;
+			path = InstalledApps;
+			sourceTree = "<group>";
+		};
 		E00000050000000000000001 = {
 			isa = PBXGroup;
 			children = (
@@ -146,6 +164,7 @@
 				E00000020000000000000007 /* ADBError.swift */,
 				E00000020000000000000031 /* AppSettings.swift */,
 				E00000020000000000000034 /* DiscoveredDevice.swift */,
+				55A8D4C81788B3278F7D5F24 /* InstalledApp.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -168,6 +187,7 @@
 			isa = PBXGroup;
 			children = (
 				E00000020000000000000017 /* DeviceDetailViewModel.swift */,
+				D1CA7078B945077C30D30D25 /* InstalledAppsViewModel.swift */,
 			);
 			path = ViewModels;
 			sourceTree = "<group>";
@@ -183,6 +203,7 @@
 				E00000050000000000000019 /* Tools */,
 				E00000050000000000000020 /* Settings */,
 				E00000050000000000000023 /* APKInstaller */,
+				2F9061625562A1D737FE9880 /* InstalledApps */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -421,6 +442,10 @@
 				E00000010000000000000036 /* UpdateService.swift in Sources */,
 				E00000010000000000000037 /* GitHubRelease.swift in Sources */,
 				E00000010000000000000038 /* APKInstallerView.swift in Sources */,
+				D33D7E38DA7214CCE1AF2FE7 /* InstalledApp.swift in Sources */,
+				B4A0E97B24E46EEBF0EF6620 /* InstalledAppsViewModel.swift in Sources */,
+				FCC1383DCF24102D2B126FD5 /* InstalledAppsView.swift in Sources */,
+				7C92DA4E342DC74D3E9C4A56 /* InstalledAppRow.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -18,6 +18,23 @@ protocol ADBService {
     func removeAllReverseForwards(deviceId: String) async throws
     func enableTcpip(port: Int, deviceId: String) async throws
     func installAPK(path: URL, deviceId: String, onStart: @escaping (APKInstallHandle) -> Void, onProgress: @escaping (String) -> Void) async throws
+
+    // App Management
+    func listPackages(deviceId: String, filter: AppListFilter) async throws -> [String]
+    func getPackageInfo(packageName: String, deviceId: String) async throws -> InstalledApp
+    func launchApp(packageName: String, deviceId: String) async throws
+    func forceStopApp(packageName: String, deviceId: String) async throws
+    func uninstallApp(packageName: String, keepData: Bool, deviceId: String) async throws
+    func disableApp(packageName: String, deviceId: String) async throws
+    func enableApp(packageName: String, deviceId: String) async throws
+    func openAppSettings(packageName: String, deviceId: String) async throws
+}
+
+enum AppListFilter {
+    case all
+    case thirdParty
+    case system
+    case disabled
 }
 
 final class APKInstallHandle: @unchecked Sendable {
