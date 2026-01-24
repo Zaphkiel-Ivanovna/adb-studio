@@ -22,6 +22,9 @@ final class DeviceDetailViewModel: ObservableObject {
     @Published var isInstallingAPK = false
     @Published var apkInstallProgress: String = ""
     @Published var apkInstallResult: APKInstallResult?
+    @Published var isRebooting = false
+    @Published var showRebootConfirmation = false
+    @Published var pendingRebootMode: RebootMode?
     private var apkInstallTask: Task<Void, Never>?
     private var apkInstallHandle: APKInstallHandle?
 
@@ -325,5 +328,37 @@ final class DeviceDetailViewModel: ObservableObject {
                 successMessage = nil
             }
         }
+    }
+
+    // MARK: - Power Actions
+
+    func requestReboot(mode: RebootMode) {
+        pendingRebootMode = mode
+        showRebootConfirmation = true
+    }
+
+    func confirmReboot() async {
+        guard let mode = pendingRebootMode else { return }
+
+        showRebootConfirmation = false
+        isRebooting = true
+        errorMessage = nil
+
+        do {
+            try await adbService.reboot(deviceId: device.bestAdbId, mode: mode)
+            showSuccess("Device is rebooting...")
+        } catch let error as ADBError {
+            errorMessage = error.localizedDescription
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+
+        isRebooting = false
+        pendingRebootMode = nil
+    }
+
+    func cancelReboot() {
+        showRebootConfirmation = false
+        pendingRebootMode = nil
     }
 }

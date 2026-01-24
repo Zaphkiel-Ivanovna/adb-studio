@@ -485,4 +485,23 @@ final class ADBServiceImpl: ADBService {
             throw ADBError.appActionFailed("Open Settings", result.combinedOutput)
         }
     }
+
+    // MARK: - Power Actions
+
+    func reboot(deviceId: String, mode: RebootMode) async throws {
+        var args = ["reboot"]
+        if !mode.rawValue.isEmpty {
+            args.append(mode.rawValue)
+        }
+
+        let result = try await adb(deviceId: deviceId, args, timeout: 30)
+
+        // Reboot command may not return success if device disconnects during reboot
+        // This is expected behavior, so we only check for explicit errors
+        if result.exitCode != 0 && !result.errorOutput.isEmpty {
+            if result.errorOutput.contains("error:") {
+                throw ADBError.commandFailed("reboot \(mode.rawValue)", result.exitCode)
+            }
+        }
+    }
 }

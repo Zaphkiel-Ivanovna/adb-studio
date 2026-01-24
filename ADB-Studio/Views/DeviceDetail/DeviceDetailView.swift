@@ -1,5 +1,25 @@
 import SwiftUI
 
+enum DeviceDetailTab: String, CaseIterable, Identifiable {
+    case info = "Info"
+    case tools = "Tools"
+    case apps = "Apps"
+    case network = "Network"
+    case power = "Power"
+
+    var id: String { rawValue }
+
+    var systemImage: String {
+        switch self {
+        case .info: return "info.circle"
+        case .tools: return "wrench.and.screwdriver"
+        case .apps: return "square.grid.2x2"
+        case .network: return "network"
+        case .power: return "power"
+        }
+    }
+}
+
 struct DeviceDetailView: View {
     let device: Device
     let adbService: ADBService
@@ -7,6 +27,7 @@ struct DeviceDetailView: View {
     let deviceManager: DeviceManager
 
     @StateObject private var viewModel: DeviceDetailViewModel
+    @State private var selectedTab: DeviceDetailTab = .info
 
     init(device: Device, adbService: ADBService, screenshotService: ScreenshotService, deviceManager: DeviceManager) {
         self.device = device
@@ -22,29 +43,34 @@ struct DeviceDetailView: View {
     }
 
     var body: some View {
-        ScrollView {
-            VStack(spacing: 24) {
-                DeviceHeaderView(viewModel: viewModel)
+        VStack(spacing: 0) {
+            DeviceHeaderView(viewModel: viewModel)
+                .padding(.horizontal, 24)
+                .padding(.top, 24)
+                .padding(.bottom, 16)
 
-                if device.state == .device {
-                    DeviceInfoSection(device: viewModel.device)
-                    ToolsView(viewModel: viewModel)
-                    PortForwardView(viewModel: viewModel)
-                    APKInstallerView(viewModel: viewModel)
-                    InstalledAppsView(deviceId: device.bestAdbId, adbService: adbService)
-                } else {
-                    DeviceStateMessageView(state: device.state)
+            if device.state == .device {
+                Picker("", selection: $selectedTab) {
+                    ForEach(DeviceDetailTab.allCases) { tab in
+                        Label(tab.rawValue, systemImage: tab.systemImage)
+                            .tag(tab)
+                    }
                 }
+                .pickerStyle(.segmented)
+                .padding(.horizontal, 24)
+                .padding(.bottom, 16)
+
+                Divider()
+
+                tabContent
+            } else {
+                DeviceStateMessageView(state: device.state)
+                    .padding(24)
+                Spacer()
             }
-            .padding(24)
         }
         .navigationTitle(device.displayName)
         .id(device.id)
-        .task(id: device.id) {
-            if device.state == .device {
-                await viewModel.loadPortForwards()
-            }
-        }
         .onChange(of: device) { _, newDevice in
             viewModel.updateDevice(newDevice)
         }
@@ -59,6 +85,41 @@ struct DeviceDetailView: View {
         }
         .sheet(isPresented: $viewModel.showAddPortSheet) {
             AddPortSheet(viewModel: viewModel)
+        }
+    }
+
+    @ViewBuilder
+    private var tabContent: some View {
+        switch selectedTab {
+        case .info:
+            ScrollView {
+                DeviceInfoSection(device: viewModel.device)
+                    .padding(24)
+            }
+        case .tools:
+            ScrollView {
+                ToolsView(viewModel: viewModel)
+                    .padding(24)
+            }
+        case .apps:
+            ScrollView {
+                VStack(spacing: 24) {
+                    APKInstallerView(viewModel: viewModel)
+                    InstalledAppsView(deviceId: device.bestAdbId, adbService: adbService)
+                }
+                .padding(24)
+            }
+        case .network:
+            ScrollView {
+                PortForwardView(viewModel: viewModel)
+                    .padding(24)
+            }
+            .task { await viewModel.loadPortForwards() }
+        case .power:
+            ScrollView {
+                PowerView(viewModel: viewModel)
+                    .padding(24)
+            }
         }
     }
 }

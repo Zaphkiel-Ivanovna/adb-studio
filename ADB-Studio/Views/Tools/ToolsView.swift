@@ -226,6 +226,175 @@ struct TcpipSection: View {
     }
 }
 
+struct PowerView: View {
+    @ObservedObject var viewModel: DeviceDetailViewModel
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Text("Power")
+                .font(.headline)
+
+            VStack(alignment: .leading, spacing: 12) {
+                // Warning banner
+                HStack(spacing: 8) {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .foregroundColor(.orange)
+
+                    Text("These actions will interrupt device operation. The device will temporarily disconnect from ADB.")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+                .padding(10)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(Color.orange.opacity(0.1))
+                .cornerRadius(8)
+
+                // Reboot options grid
+                LazyVGrid(columns: [
+                    GridItem(.flexible()),
+                    GridItem(.flexible()),
+                    GridItem(.flexible())
+                ], spacing: 10) {
+                    ForEach(RebootMode.allCases, id: \.self) { mode in
+                        PowerActionButton(
+                            mode: mode,
+                            isRebooting: viewModel.isRebooting,
+                            action: { viewModel.requestReboot(mode: mode) }
+                        )
+                    }
+                }
+            }
+        }
+        .padding()
+        .background(Color(NSColor.controlBackgroundColor))
+        .cornerRadius(12)
+        .confirmationDialog(
+            "Confirm Reboot",
+            isPresented: $viewModel.showRebootConfirmation,
+            titleVisibility: .visible
+        ) {
+            Button("Confirm", role: .destructive) {
+                Task { await viewModel.confirmReboot() }
+            }
+            Button("Cancel", role: .cancel) {
+                viewModel.cancelReboot()
+            }
+        } message: {
+            if let mode = viewModel.pendingRebootMode {
+                Text("Are you sure you want to \(mode.displayName.lowercased())? The device will disconnect temporarily.")
+            }
+        }
+    }
+}
+
+struct PowerActionsSection: View {
+    @ObservedObject var viewModel: DeviceDetailViewModel
+    @State private var isExpanded = false
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Button(action: { withAnimation(.easeInOut(duration: 0.2)) { isExpanded.toggle() } }) {
+                HStack {
+                    Label("Power Actions", systemImage: "power")
+                        .font(.subheadline)
+                        .fontWeight(.medium)
+
+                    Spacer()
+
+                    Image(systemName: "chevron.right")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .rotationEffect(.degrees(isExpanded ? 90 : 0))
+                }
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+
+            if isExpanded {
+                VStack(alignment: .leading, spacing: 12) {
+                    // Warning banner
+                    HStack(spacing: 8) {
+                        Image(systemName: "exclamationmark.triangle.fill")
+                            .foregroundColor(.orange)
+
+                        Text("These actions will interrupt device operation. The device will temporarily disconnect from ADB.")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                    .padding(10)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(Color.orange.opacity(0.1))
+                    .cornerRadius(8)
+
+                    // Reboot options grid
+                    LazyVGrid(columns: [
+                        GridItem(.flexible()),
+                        GridItem(.flexible()),
+                        GridItem(.flexible())
+                    ], spacing: 10) {
+                        ForEach(RebootMode.allCases, id: \.self) { mode in
+                            PowerActionButton(
+                                mode: mode,
+                                isRebooting: viewModel.isRebooting,
+                                action: { viewModel.requestReboot(mode: mode) }
+                            )
+                        }
+                    }
+                }
+                .transition(.opacity.combined(with: .move(edge: .top)))
+            }
+        }
+        .confirmationDialog(
+            "Confirm Reboot",
+            isPresented: $viewModel.showRebootConfirmation,
+            titleVisibility: .visible
+        ) {
+            Button("Confirm", role: .destructive) {
+                Task { await viewModel.confirmReboot() }
+            }
+            Button("Cancel", role: .cancel) {
+                viewModel.cancelReboot()
+            }
+        } message: {
+            if let mode = viewModel.pendingRebootMode {
+                Text("Are you sure you want to \(mode.displayName.lowercased())? The device will disconnect temporarily.")
+            }
+        }
+    }
+}
+
+struct PowerActionButton: View {
+    let mode: RebootMode
+    let isRebooting: Bool
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            VStack(spacing: 6) {
+                if isRebooting {
+                    ProgressView()
+                        .controlSize(.small)
+                        .frame(height: 20)
+                } else {
+                    Image(systemName: mode.systemImage)
+                        .font(.title3)
+                }
+
+                Text(mode.displayName)
+                    .font(.caption)
+                    .multilineTextAlignment(.center)
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.8)
+            }
+            .frame(maxWidth: .infinity)
+            .frame(height: 70)
+            .help(mode.description)
+        }
+        .buttonStyle(.bordered)
+        .disabled(isRebooting)
+    }
+}
+
 #Preview {
     let settingsStore = SettingsStore()
     let adbService = ADBServiceImpl(settingsStore: settingsStore)

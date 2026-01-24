@@ -28,6 +28,9 @@ protocol ADBService {
     func disableApp(packageName: String, deviceId: String) async throws
     func enableApp(packageName: String, deviceId: String) async throws
     func openAppSettings(packageName: String, deviceId: String) async throws
+
+    // Power Actions
+    func reboot(deviceId: String, mode: RebootMode) async throws
 }
 
 enum AppListFilter {
@@ -65,4 +68,42 @@ enum AndroidKeyCode: Int {
     case enter = 66
     case delete = 67
     case tab = 61
+}
+
+enum RebootMode: String, CaseIterable {
+    case normal = ""
+    case recovery = "recovery"
+    case bootloader = "bootloader"
+    case sideload = "sideload"
+    case sideloadAutoReboot = "sideload-auto-reboot"
+
+    var displayName: String {
+        switch self {
+        case .normal: return "Reboot"
+        case .recovery: return "Recovery Mode"
+        case .bootloader: return "Bootloader/Fastboot"
+        case .sideload: return "Sideload Mode"
+        case .sideloadAutoReboot: return "Sideload (Auto-Reboot)"
+        }
+    }
+
+    var systemImage: String {
+        switch self {
+        case .normal: return "arrow.clockwise"
+        case .recovery: return "wrench.and.screwdriver"
+        case .bootloader: return "cpu"
+        case .sideload: return "arrow.down.circle"
+        case .sideloadAutoReboot: return "arrow.down.circle.fill"
+        }
+    }
+
+    var description: String {
+        switch self {
+        case .normal: return "Restart the device normally"
+        case .recovery: return "Boot into recovery mode for system maintenance"
+        case .bootloader: return "Boot into bootloader/fastboot mode"
+        case .sideload: return "Boot into sideload mode for manual updates"
+        case .sideloadAutoReboot: return "Sideload mode with automatic reboot after"
+        }
+    }
 }

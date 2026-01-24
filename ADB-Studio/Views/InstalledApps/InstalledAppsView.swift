@@ -2,7 +2,6 @@ import SwiftUI
 
 struct InstalledAppsView: View {
     @StateObject private var viewModel: InstalledAppsViewModel
-    @State private var isExpanded = false
 
     init(deviceId: String, adbService: ADBService) {
         _viewModel = StateObject(wrappedValue: InstalledAppsViewModel(
@@ -15,28 +14,33 @@ struct InstalledAppsView: View {
         VStack(alignment: .leading, spacing: 0) {
             headerView
 
-            if isExpanded {
-                Divider()
-                    .padding(.horizontal)
+            Divider()
+                .padding(.horizontal)
 
-                filterBar
-                    .padding(.horizontal)
-                    .padding(.top, 12)
+            filterBar
+                .padding(.horizontal)
+                .padding(.top, 12)
 
-                if viewModel.isLoading && viewModel.apps.isEmpty {
-                    loadingView
-                } else if viewModel.apps.isEmpty {
-                    emptyView
-                } else {
-                    appList
-                }
-
-                footerView
+            if viewModel.isLoading && viewModel.apps.isEmpty {
+                loadingView
+            } else if viewModel.apps.isEmpty {
+                emptyView
+            } else {
+                appList
             }
+
+            footerView
         }
         .padding()
         .background(Color(NSColor.controlBackgroundColor))
         .cornerRadius(12)
+        .onAppear {
+            if viewModel.apps.isEmpty {
+                Task {
+                    await viewModel.loadApps()
+                }
+            }
+        }
         .alert("Uninstall App", isPresented: $viewModel.showUninstallConfirmation) {
             Button("Cancel", role: .cancel) {
                 viewModel.cancelUninstall()
@@ -64,33 +68,17 @@ struct InstalledAppsView: View {
 
             Spacer()
 
-            if isExpanded {
-                Button {
-                    Task {
-                        await viewModel.loadApps()
-                    }
-                } label: {
-                    Image(systemName: "arrow.clockwise")
-                }
-                .buttonStyle(.borderless)
-                .disabled(viewModel.isLoading)
-            }
-
             Button {
-                withAnimation(.easeInOut(duration: 0.2)) {
-                    isExpanded.toggle()
-                }
-                if isExpanded && viewModel.apps.isEmpty {
-                    Task {
-                        await viewModel.loadApps()
-                    }
+                Task {
+                    await viewModel.loadApps()
                 }
             } label: {
-                Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
+                Image(systemName: "arrow.clockwise")
             }
             .buttonStyle(.borderless)
+            .disabled(viewModel.isLoading)
         }
-        .padding(.bottom, isExpanded ? 8 : 0)
+        .padding(.bottom, 8)
     }
 
     private var filterBar: some View {

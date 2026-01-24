@@ -67,6 +67,12 @@ final class DeviceManager: ObservableObject {
         do {
             var newDevices = try await adbService.listDevices()
 
+            // Clean up stale offline WiFi connections
+            await cleanupOfflineWiFiDevices(newDevices)
+
+            // Re-fetch after cleanup in case list changed
+            newDevices = try await adbService.listDevices()
+
             newDevices = await withTaskGroup(of: (Int, Device).self) { group in
                 for (index, device) in newDevices.enumerated() {
                     group.addTask {
@@ -147,6 +153,19 @@ final class DeviceManager: ObservableObject {
 
     func clearError() {
         lastError = nil
+    }
+
+    /// Disconnects stale offline WiFi devices to clean up ADB's device list.
+    /// A WiFi device is considered stale if it's offline and not useful anymore.
+    private func cleanupOfflineWiFiDevices(_ devices: [Device]) async {
+        let offlineWiFiDevices = devices.filter { device in
+            device.state != .device && device.connection.isWiFiBased
+        }
+
+        for device in offlineWiFiDevices {
+            // Try to disconnect this stale offline WiFi connection
+            try? await adbService.disconnect(from: device.adbId)
+        }
     }
 
     private func mergeWithHistory(_ devices: [Device]) -> [Device] {
