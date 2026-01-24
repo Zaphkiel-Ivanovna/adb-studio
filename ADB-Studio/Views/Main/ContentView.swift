@@ -1,10 +1,12 @@
 import SwiftUI
+import AppKit
 
 struct ContentView: View {
     @EnvironmentObject private var container: DependencyContainer
     @EnvironmentObject private var deviceManager: DeviceManager
     @State private var selectedDeviceId: String?
     @State private var showWiFiConnectionSheet = false
+    @State private var showUpdateAlert = false
 
     var body: some View {
         NavigationSplitView {
@@ -28,6 +30,18 @@ struct ContentView: View {
         }
         .navigationSplitViewStyle(.balanced)
         .toolbar {
+            if container.updateService.updateAvailable {
+                ToolbarItem(placement: .primaryAction) {
+                    Button(action: {
+                        showUpdateAlert = true
+                    }) {
+                        Image(systemName: "arrow.down.circle.fill")
+                            .foregroundStyle(.white, .blue)
+                    }
+                    .help("Update available: v\(container.updateService.latestRelease?.version ?? "")")
+                }
+            }
+
             ToolbarItemGroup(placement: .primaryAction) {
                 SettingsLink {
                     Image(systemName: "gearshape")
@@ -73,6 +87,26 @@ struct ContentView: View {
             Button("OK") { }
         } message: {
             Text("Please install Android SDK platform-tools and ensure 'adb' is in your PATH.")
+        }
+        .onChange(of: container.updateService.updateAvailable) { _, available in
+            if available { showUpdateAlert = true }
+        }
+        .alert("Update Available", isPresented: $showUpdateAlert) {
+            if let dmgUrl = container.updateService.latestRelease?.dmgDownloadUrl,
+               let url = URL(string: dmgUrl) {
+                Button("Download Update") {
+                    NSWorkspace.shared.open(url)
+                }
+            }
+            Button("View on GitHub") {
+                if let htmlUrl = container.updateService.latestRelease?.htmlUrl,
+                   let url = URL(string: htmlUrl) {
+                    NSWorkspace.shared.open(url)
+                }
+            }
+            Button("Later", role: .cancel) { }
+        } message: {
+            Text("Version \(container.updateService.latestRelease?.version ?? "") is available.")
         }
     }
 }

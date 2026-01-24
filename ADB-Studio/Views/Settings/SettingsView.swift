@@ -128,6 +128,15 @@ struct GeneralSettingsTab: View {
                         set: { newValue in settingsStore.update { $0.autoConnectLastDevices = newValue } }
                     )
                 )
+
+                SettingsToggle(
+                    title: "Check for updates on launch",
+                    description: "Automatically check for new versions when the app starts",
+                    isOn: Binding(
+                        get: { settingsStore.settings.checkForUpdatesOnLaunch },
+                        set: { newValue in settingsStore.update { $0.checkForUpdatesOnLaunch = newValue } }
+                    )
+                )
             }
 
             SettingsSection(title: "SCREENSHOTS") {

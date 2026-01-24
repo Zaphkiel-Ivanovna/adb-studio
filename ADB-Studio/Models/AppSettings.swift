@@ -8,6 +8,7 @@ struct AppSettings: Codable, Equatable {
     var autoConnectLastDevices: Bool = false
     var showConnectionNotifications: Bool = true
     var screenshotSaveLocation: ScreenshotLocation = .downloads
+    var checkForUpdatesOnLaunch: Bool = true
 
     enum ScreenshotLocation: String, Codable, CaseIterable {
         case downloads = "downloads"

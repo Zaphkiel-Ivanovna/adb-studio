@@ -14,11 +14,6 @@
 		E00000010000000000000005 /* PortForward.swift in Sources */ = {isa = PBXBuildFile; fileRef = E00000020000000000000005 /* PortForward.swift */; };
 		E00000010000000000000006 /* DeviceHistory.swift in Sources */ = {isa = PBXBuildFile; fileRef = E00000020000000000000006 /* DeviceHistory.swift */; };
 		E00000010000000000000007 /* ADBError.swift in Sources */ = {isa = PBXBuildFile; fileRef = E00000020000000000000007 /* ADBError.swift */; };
-		E00000010000000000000034 /* DiscoveredDevice.swift in Sources */ = {isa = PBXBuildFile; fileRef = E00000020000000000000034 /* DiscoveredDevice.swift */; };
-		E00000010000000000000035 /* DeviceDiscoveryService.swift in Sources */ = {isa = PBXBuildFile; fileRef = E00000020000000000000035 /* DeviceDiscoveryService.swift */; };
-		E00000010000000000000031 /* AppSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = E00000020000000000000031 /* AppSettings.swift */; };
-		E00000010000000000000032 /* SettingsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = E00000020000000000000032 /* SettingsStore.swift */; };
-		E00000010000000000000033 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E00000020000000000000033 /* SettingsView.swift */; };
 		E00000010000000000000008 /* ADBService.swift in Sources */ = {isa = PBXBuildFile; fileRef = E00000020000000000000008 /* ADBService.swift */; };
 		E00000010000000000000009 /* ADBServiceImpl.swift in Sources */ = {isa = PBXBuildFile; fileRef = E00000020000000000000009 /* ADBServiceImpl.swift */; };
 		E00000010000000000000010 /* ADBOutputParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = E00000020000000000000010 /* ADBOutputParser.swift */; };
@@ -40,6 +35,13 @@
 		E00000010000000000000027 /* AddPortSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = E00000020000000000000027 /* AddPortSheet.swift */; };
 		E00000010000000000000028 /* ToolsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E00000020000000000000028 /* ToolsView.swift */; };
 		E00000010000000000000029 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E00000020000000000000029 /* Assets.xcassets */; };
+		E00000010000000000000031 /* AppSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = E00000020000000000000031 /* AppSettings.swift */; };
+		E00000010000000000000032 /* SettingsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = E00000020000000000000032 /* SettingsStore.swift */; };
+		E00000010000000000000033 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E00000020000000000000033 /* SettingsView.swift */; };
+		E00000010000000000000034 /* DiscoveredDevice.swift in Sources */ = {isa = PBXBuildFile; fileRef = E00000020000000000000034 /* DiscoveredDevice.swift */; };
+		E00000010000000000000035 /* DeviceDiscoveryService.swift in Sources */ = {isa = PBXBuildFile; fileRef = E00000020000000000000035 /* DeviceDiscoveryService.swift */; };
+		E00000010000000000000036 /* UpdateService.swift in Sources */ = {isa = PBXBuildFile; fileRef = E00000020000000000000036 /* UpdateService.swift */; };
+		E00000010000000000000037 /* GitHubRelease.swift in Sources */ = {isa = PBXBuildFile; fileRef = E00000020000000000000037 /* GitHubRelease.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -77,6 +79,8 @@
 		E00000020000000000000033 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		E00000020000000000000034 /* DiscoveredDevice.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiscoveredDevice.swift; sourceTree = "<group>"; };
 		E00000020000000000000035 /* DeviceDiscoveryService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceDiscoveryService.swift; sourceTree = "<group>"; };
+		E00000020000000000000036 /* UpdateService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateService.swift; sourceTree = "<group>"; };
+		E00000020000000000000037 /* GitHubRelease.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GitHubRelease.swift; sourceTree = "<group>"; };
 		E00000030000000000000001 /* ADB-Studio.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "ADB-Studio.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -153,6 +157,7 @@
 				E00000050000000000000011 /* Media */,
 				E00000050000000000000012 /* Persistence */,
 				E00000050000000000000013 /* Shell */,
+				E00000050000000000000022 /* Updates */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -223,14 +228,6 @@
 			path = Shell;
 			sourceTree = "<group>";
 		};
-		E00000050000000000000021 /* Discovery */ = {
-			isa = PBXGroup;
-			children = (
-				E00000020000000000000035 /* DeviceDiscoveryService.swift */,
-			);
-			path = Discovery;
-			sourceTree = "<group>";
-		};
 		E00000050000000000000014 /* Main */ = {
 			isa = PBXGroup;
 			children = (
@@ -290,6 +287,23 @@
 				E00000020000000000000033 /* SettingsView.swift */,
 			);
 			path = Settings;
+			sourceTree = "<group>";
+		};
+		E00000050000000000000021 /* Discovery */ = {
+			isa = PBXGroup;
+			children = (
+				E00000020000000000000035 /* DeviceDiscoveryService.swift */,
+			);
+			path = Discovery;
+			sourceTree = "<group>";
+		};
+		E00000050000000000000022 /* Updates */ = {
+			isa = PBXGroup;
+			children = (
+				E00000020000000000000036 /* UpdateService.swift */,
+				E00000020000000000000037 /* GitHubRelease.swift */,
+			);
+			path = Updates;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -393,6 +407,8 @@
 				E00000010000000000000033 /* SettingsView.swift in Sources */,
 				E00000010000000000000034 /* DiscoveredDevice.swift in Sources */,
 				E00000010000000000000035 /* DeviceDiscoveryService.swift in Sources */,
+				E00000010000000000000036 /* UpdateService.swift in Sources */,
+				E00000010000000000000037 /* GitHubRelease.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -536,7 +552,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 0.0.1;
 				PRODUCT_BUNDLE_IDENTIFIER = dev.zaphkiel.adbstudio;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -563,7 +579,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 0.0.1;
 				PRODUCT_BUNDLE_IDENTIFIER = dev.zaphkiel.adbstudio;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;

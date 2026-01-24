@@ -11,6 +11,7 @@ final class DependencyContainer: ObservableObject {
     let screenshotService: ScreenshotService
     let deviceManager: DeviceManager
     let discoveryService: DeviceDiscoveryService
+    let updateService: UpdateService
 
     private var cancellables = Set<AnyCancellable>()
 
@@ -28,12 +29,19 @@ final class DependencyContainer: ObservableObject {
             settingsStore: settingsStore
         )
         self.discoveryService = DeviceDiscoveryService(historyStore: historyStore)
+        self.updateService = UpdateService()
 
         setupSettingsObserver()
     }
 
     func start() {
         deviceManager.startMonitoring()
+
+        if settingsStore.settings.checkForUpdatesOnLaunch {
+            Task {
+                await updateService.checkForUpdates()
+            }
+        }
     }
 
     func stop() {
