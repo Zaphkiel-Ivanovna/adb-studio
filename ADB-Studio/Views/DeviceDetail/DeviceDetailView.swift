@@ -6,6 +6,7 @@ enum DeviceDetailTab: String, CaseIterable, Identifiable {
     case apps = "Apps"
     case network = "Network"
     case power = "Power"
+    case mirror = "Mirror"
 
     var id: String { rawValue }
 
@@ -16,6 +17,7 @@ enum DeviceDetailTab: String, CaseIterable, Identifiable {
         case .apps: return "square.grid.2x2"
         case .network: return "network"
         case .power: return "power"
+        case .mirror: return "display"
         }
     }
 }
@@ -118,6 +120,11 @@ struct DeviceDetailView: View {
         case .power:
             ScrollView {
                 PowerView(viewModel: viewModel)
+                    .padding(24)
+            }
+        case .mirror:
+            ScrollView {
+                MirroringTabView(deviceId: device.bestAdbId)
                     .padding(24)
             }
         }

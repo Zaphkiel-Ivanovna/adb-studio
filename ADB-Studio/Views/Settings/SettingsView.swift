@@ -29,6 +29,13 @@ struct SettingsView: View {
                 Label("Network", systemImage: "wifi")
             }
 
+            SettingsTabContainer(minHeight: minHeight, maxHeight: maxHeight) {
+                MirroringSettingsTab(settingsStore: settingsStore)
+            }
+            .tabItem {
+                Label("Mirroring", systemImage: "display")
+            }
+
             AboutSettingsTab()
                 .frame(height: minHeight)
                 .tabItem {
@@ -303,6 +310,110 @@ struct NetworkSettingsTab: View {
         // Valid port - clear error and update
         portError = nil
         settingsStore.update { $0.defaultTcpipPort = port }
+    }
+}
+
+// MARK: - Mirroring Tab
+
+struct MirroringSettingsTab: View {
+    @ObservedObject var settingsStore: SettingsStore
+
+    private let resolutionOptions: [(label: String, value: Int)] = [
+        ("Native", 0),
+        ("2560 px", 2560),
+        ("1920 px", 1920),
+        ("1280 px", 1280),
+        ("960 px", 960),
+        ("720 px", 720)
+    ]
+
+    private let fpsOptions: [Int] = [30, 60, 90, 120]
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 20) {
+            SettingsSection(title: "VIDEO QUALITY") {
+                SettingsRow(
+                    title: "Max resolution",
+                    description: "Caps the longest side of the streamed image. Native keeps the device's full resolution."
+                ) {
+                    Picker("", selection: Binding(
+                        get: { settingsStore.settings.mirroringMaxSize },
+                        set: { newValue in settingsStore.update { $0.mirroringMaxSize = newValue } }
+                    )) {
+                        ForEach(resolutionOptions, id: \.value) { option in
+                            Text(option.label).tag(option.value)
+                        }
+                    }
+                    .frame(width: 110)
+                }
+
+                SettingsRow(
+                    title: "Max FPS",
+                    description: "Target frame rate. Higher values produce smoother motion but use more bandwidth."
+                ) {
+                    Picker("", selection: Binding(
+                        get: { settingsStore.settings.mirroringMaxFps },
+                        set: { newValue in settingsStore.update { $0.mirroringMaxFps = newValue } }
+                    )) {
+                        ForEach(fpsOptions, id: \.self) { fps in
+                            Text("\(fps) fps").tag(fps)
+                        }
+                    }
+                    .frame(width: 110)
+                }
+            }
+
+            SettingsSection(title: "COMFORT") {
+                SettingsToggle(
+                    title: "Turn off device display on start",
+                    description: "Sends a display-off command right after the handshake. Mirroring continues, the physical screen stays dark.",
+                    isOn: Binding(
+                        get: { settingsStore.settings.mirroringTurnOffDisplayOnStart },
+                        set: { newValue in settingsStore.update { $0.mirroringTurnOffDisplayOnStart = newValue } }
+                    )
+                )
+                SettingsToggle(
+                    title: "Keep device awake while mirroring",
+                    description: "Prevents the device from dimming or locking during a session.",
+                    isOn: Binding(
+                        get: { settingsStore.settings.mirroringStayAwake },
+                        set: { newValue in settingsStore.update { $0.mirroringStayAwake = newValue } }
+                    )
+                )
+                SettingsToggle(
+                    title: "Show touches on device",
+                    description: "Enables the developer option that draws taps on-device for the duration of the session.",
+                    isOn: Binding(
+                        get: { settingsStore.settings.mirroringShowTouches },
+                        set: { newValue in settingsStore.update { $0.mirroringShowTouches = newValue } }
+                    )
+                )
+                SettingsToggle(
+                    title: "Auto-sync clipboard",
+                    description: "Forwards macOS clipboard changes to the device automatically (no need to press ⌘V).",
+                    isOn: Binding(
+                        get: { settingsStore.settings.mirroringClipboardAutosync },
+                        set: { newValue in settingsStore.update { $0.mirroringClipboardAutosync = newValue } }
+                    )
+                )
+            }
+
+            SettingsSection(title: "INPUT") {
+                SettingsToggle(
+                    title: "Right-click opens a context menu",
+                    description: "When on, a right-click in the mirror window shows a macOS menu instead of being forwarded as a secondary touch.",
+                    isOn: Binding(
+                        get: { settingsStore.settings.mirroringRightClickOpensMenu },
+                        set: { newValue in settingsStore.update { $0.mirroringRightClickOpensMenu = newValue } }
+                    )
+                )
+            }
+
+            Label("Changes apply to new mirroring sessions. Already-open windows keep their current settings.", systemImage: "info.circle")
+                .font(.caption)
+                .foregroundColor(.secondary)
+        }
+        .padding(24)
     }
 }
 

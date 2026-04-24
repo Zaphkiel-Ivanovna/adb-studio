@@ -1,5 +1,11 @@
 import Foundation
 
+struct ShellProcessHandle {
+    let process: Process
+    let stdout: Pipe
+    let stderr: Pipe
+}
+
 protocol ADBService {
     func isADBAvailable() async -> Bool
     func listDevices() async throws -> [Device]
@@ -9,12 +15,16 @@ protocol ADBService {
     func getProperty(_ property: String, deviceId: String) async throws -> String
     func getProperties(_ properties: [String], deviceId: String) async throws -> [String: String]
     func shell(_ command: String, deviceId: String) async throws -> String
+    func shellRawProcess(deviceId: String, arguments: [String]) throws -> ShellProcessHandle
     func takeScreenshot(deviceId: String) async throws -> Data
     func inputText(_ text: String, deviceId: String, characterDelayMs: Int) async throws
     func inputKeyEvent(_ keyCode: Int, deviceId: String) async throws
+    func push(localPath: URL, remotePath: String, deviceId: String) async throws
     func listReverseForwards(deviceId: String) async throws -> [PortForward]
     func createReverseForward(localPort: Int, remotePort: Int, deviceId: String) async throws
+    func createReverseForward(localSocketName: String, remotePort: Int, deviceId: String) async throws
     func removeReverseForward(localPort: Int, deviceId: String) async throws
+    func removeReverseForward(localSocketName: String, deviceId: String) async throws
     func removeAllReverseForwards(deviceId: String) async throws
     func enableTcpip(port: Int, deviceId: String) async throws
     func installAPK(path: URL, deviceId: String, onStart: @escaping (APKInstallHandle) -> Void, onProgress: @escaping (String) -> Void) async throws

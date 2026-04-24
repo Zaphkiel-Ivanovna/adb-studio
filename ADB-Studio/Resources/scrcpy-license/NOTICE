@@ -1,0 +1,11 @@
+This product includes software from scrcpy (https://github.com/Genymobile/scrcpy).
+
+The `scrcpy-server` binary bundled with this application is part of scrcpy
+version 3.3.4 and is distributed under the terms of the Apache License,
+Version 2.0. A copy of the license is provided in the LICENSE file alongside
+this notice.
+
+Copyright (C) 2017  Romain Vimont (scrcpy)
+
+scrcpy is © Romain Vimont and the scrcpy contributors. This application
+is not affiliated with, endorsed by, or sponsored by scrcpy or its authors.

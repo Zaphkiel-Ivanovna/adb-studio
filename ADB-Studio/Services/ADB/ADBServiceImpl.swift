@@ -141,6 +141,27 @@ final class ADBServiceImpl: ADBService {
         return result.output
     }
 
+    func shellRawProcess(deviceId: String, arguments: [String]) throws -> ShellProcessHandle {
+        let adbPath = try getADBPath()
+        let process = Process()
+        let stdout = Pipe()
+        let stderr = Pipe()
+
+        process.executableURL = URL(fileURLWithPath: adbPath)
+        process.arguments = ["-s", deviceId, "shell"] + arguments
+        process.standardOutput = stdout
+        process.standardError = stderr
+
+        return ShellProcessHandle(process: process, stdout: stdout, stderr: stderr)
+    }
+
+    func push(localPath: URL, remotePath: String, deviceId: String) async throws {
+        let result = try await adb(deviceId: deviceId, ["push", localPath.path, remotePath], timeout: 300)
+        if !result.isSuccess {
+            throw ADBError.commandFailed("push \(localPath.path) \(remotePath)", result.exitCode)
+        }
+    }
+
     func takeScreenshot(deviceId: String) async throws -> Data {
         let path = try getADBPath()
         let data = try await shell.executeRaw(path, arguments: ["-s", deviceId, "exec-out", "screencap", "-p"], timeout: 30)
@@ -210,10 +231,24 @@ final class ADBServiceImpl: ADBService {
         }
     }
 
+    func createReverseForward(localSocketName: String, remotePort: Int, deviceId: String) async throws {
+        let result = try await adb(deviceId: deviceId, ["reverse", "localabstract:\(localSocketName)", "tcp:\(remotePort)"])
+        if !result.isSuccess {
+            throw ADBError.commandFailed("reverse localabstract:\(localSocketName) tcp:\(remotePort)", result.exitCode)
+        }
+    }
+
     func removeReverseForward(localPort: Int, deviceId: String) async throws {
         let result = try await adb(deviceId: deviceId, ["reverse", "--remove", "tcp:\(localPort)"])
         if !result.isSuccess {
             throw ADBError.commandFailed("reverse --remove tcp:\(localPort)", result.exitCode)
+        }
+    }
+
+    func removeReverseForward(localSocketName: String, deviceId: String) async throws {
+        let result = try await adb(deviceId: deviceId, ["reverse", "--remove", "localabstract:\(localSocketName)"])
+        if !result.isSuccess {
+            throw ADBError.commandFailed("reverse --remove localabstract:\(localSocketName)", result.exitCode)
         }
     }
 

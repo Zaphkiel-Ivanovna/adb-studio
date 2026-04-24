@@ -67,6 +67,7 @@ No more memorizing ADB commands or switching between terminal windows. ADB Studi
 - **Automatic Device Discovery** — Detects Android devices via mDNS/Bonjour for seamless wireless connections
 - **USB & WiFi Support** — Connect devices via USB cable or wirelessly over your local network
 - **One-Click Pairing** — Pair new devices for wireless debugging with just a few clicks
+- **Screen Mirroring & Control** — View and control multiple Android devices from your Mac in dedicated windows, powered by scrcpy
 - **APK Installation** — Drag & drop APK files to install apps directly on your device
 - **App Management** — View, launch, disable, and uninstall installed apps on your device
 - **Screenshot Capture** — Take screenshots instantly and copy to clipboard or save to Downloads
@@ -141,6 +142,19 @@ open ADB-Studio.xcodeproj
 | **TCP/IP Mode**   | Enable wireless debugging via USB                  |
 | **Install APK**   | Drag & drop or select APK files to install         |
 | **Manage Apps**   | Browse, search, and manage installed applications  |
+
+### Screen Mirroring
+
+Mirror and control your Android device's screen from your Mac:
+
+1. Select a connected device
+2. Go to the **Mirror** tab
+3. Click **Open Mirror Window** — a dedicated window opens with the device screen
+4. Use your mouse to tap, drag, and scroll; your keyboard sends key events and text input
+
+Multiple devices can be mirrored in parallel — each session runs in its own window with its own video decoder.
+
+> Mirroring is powered by [scrcpy](https://github.com/Genymobile/scrcpy) 3.3.4. The server binary and its Apache License 2.0 are embedded in the app bundle.
 
 ### Port Forwarding
 
@@ -254,6 +268,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## Acknowledgements
 
 - [Android Debug Bridge (ADB)](https://developer.android.com/tools/adb) by Google
+- [scrcpy](https://github.com/Genymobile/scrcpy) by Romain Vimont — screen mirroring server (Apache 2.0)
 - Built with [SwiftUI](https://developer.apple.com/swiftui/)
 
 ---
