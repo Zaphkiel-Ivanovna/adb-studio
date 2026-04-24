@@ -58,6 +58,10 @@ struct ScreenshotSection: View {
 
 struct TextInputSection: View {
     @ObservedObject var viewModel: DeviceDetailViewModel
+    @AppStorage("sendTextCharacterDelayMs") private var characterDelayMs: Int = 50
+
+    private let delayRange = 0...1000
+    private let delayStep = 10
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -70,19 +74,60 @@ struct TextInputSection: View {
                     .textFieldStyle(.roundedBorder)
                     .onSubmit {
                         Task {
-                            await viewModel.sendText()
+                            await viewModel.sendText(characterDelayMs: characterDelayMs)
                         }
                     }
 
                 Button(action: {
                     Task {
-                        await viewModel.sendText()
+                        await viewModel.sendText(characterDelayMs: characterDelayMs)
                     }
                 }) {
-                    Image(systemName: "paperplane.fill")
+                    if viewModel.isSendingText {
+                        ProgressView()
+                            .controlSize(.small)
+                    } else {
+                        Image(systemName: "paperplane.fill")
+                    }
                 }
                 .disabled(viewModel.textToSend.isEmpty || viewModel.isSendingText)
             }
+
+            HStack(spacing: 8) {
+                Text("Typing delay")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+
+                Slider(
+                    value: Binding(
+                        get: { Double(characterDelayMs) },
+                        set: { characterDelayMs = Int($0) }
+                    ),
+                    in: Double(delayRange.lowerBound)...Double(delayRange.upperBound),
+                    step: Double(delayStep)
+                )
+                .controlSize(.small)
+
+                Stepper(
+                    "\(characterDelayMs) ms",
+                    value: $characterDelayMs,
+                    in: delayRange,
+                    step: delayStep
+                )
+                .font(.caption.monospacedDigit())
+                .fixedSize()
+
+                if characterDelayMs > 0 {
+                    Button {
+                        characterDelayMs = 0
+                    } label: {
+                        Image(systemName: "bolt.slash")
+                    }
+                    .buttonStyle(.borderless)
+                    .help("Disable delay (send in one shot)")
+                }
+            }
+            .help("Milliseconds between each character. Increase if some characters are dropped on slower devices.")
         }
     }
 }
@@ -235,7 +280,6 @@ struct PowerView: View {
                 .font(.headline)
 
             VStack(alignment: .leading, spacing: 12) {
-                // Warning banner
                 HStack(spacing: 8) {
                     Image(systemName: "exclamationmark.triangle.fill")
                         .foregroundColor(.orange)
@@ -249,7 +293,6 @@ struct PowerView: View {
                 .background(Color.orange.opacity(0.1))
                 .cornerRadius(8)
 
-                // Reboot options grid
                 LazyVGrid(columns: [
                     GridItem(.flexible()),
                     GridItem(.flexible()),
@@ -312,7 +355,6 @@ struct PowerActionsSection: View {
 
             if isExpanded {
                 VStack(alignment: .leading, spacing: 12) {
-                    // Warning banner
                     HStack(spacing: 8) {
                         Image(systemName: "exclamationmark.triangle.fill")
                             .foregroundColor(.orange)
@@ -326,7 +368,6 @@ struct PowerActionsSection: View {
                     .background(Color.orange.opacity(0.1))
                     .cornerRadius(8)
 
-                    // Reboot options grid
                     LazyVGrid(columns: [
                         GridItem(.flexible()),
                         GridItem(.flexible()),

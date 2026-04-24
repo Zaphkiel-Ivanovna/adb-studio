@@ -152,7 +152,24 @@ final class ADBServiceImpl: ADBService {
         return data
     }
 
-    func inputText(_ text: String, deviceId: String) async throws {
+    func inputText(_ text: String, deviceId: String, characterDelayMs: Int) async throws {
+        guard characterDelayMs > 0 else {
+            try await sendInputTextChunk(text, deviceId: deviceId)
+            return
+        }
+
+        var isFirst = true
+        for character in text {
+            try Task.checkCancellation()
+            if !isFirst {
+                try await Task.sleep(for: .milliseconds(characterDelayMs))
+            }
+            try await sendInputTextChunk(String(character), deviceId: deviceId)
+            isFirst = false
+        }
+    }
+
+    private func sendInputTextChunk(_ text: String, deviceId: String) async throws {
         // Escape special shell chars for `input text`
         let escaped = text
             .replacingOccurrences(of: " ", with: "%s")
@@ -483,6 +500,15 @@ final class ADBServiceImpl: ADBService {
 
         if !result.isSuccess {
             throw ADBError.appActionFailed("Open Settings", result.combinedOutput)
+        }
+    }
+
+    // MARK: - Server Management
+
+    func startServer(timeout: TimeInterval) async throws {
+        let result = try await adb(["start-server"], timeout: timeout)
+        if !result.isSuccess {
+            throw ADBError.serverStartFailed(result.combinedOutput)
         }
     }
 

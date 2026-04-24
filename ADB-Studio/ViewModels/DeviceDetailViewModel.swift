@@ -50,14 +50,14 @@ final class DeviceDetailViewModel: ObservableObject {
         self.editedName = device.customName ?? ""
     }
 
-    func sendText() async {
+    func sendText(characterDelayMs: Int) async {
         guard !textToSend.isEmpty else { return }
 
         isSendingText = true
         errorMessage = nil
 
         do {
-            try await adbService.inputText(textToSend, deviceId: device.bestAdbId)
+            try await adbService.inputText(textToSend, deviceId: device.bestAdbId, characterDelayMs: characterDelayMs)
             textToSend = ""
             showSuccess("Text sent")
         } catch let error as ADBError {

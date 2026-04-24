@@ -166,6 +166,14 @@ extension DeviceDiscoveryService: NetServiceDelegate {
             }
 
             let serviceId = "\(sender.name)-\(sender.type)"
+
+            // Android re-advertises on a new port after pairing/restart. Evict any
+            // stale entry for the same (host, type) so only the fresh one remains.
+            for (key, existing) in rawServices
+                where key != serviceId && existing.host == ipAddress && existing.type == serviceType {
+                rawServices.removeValue(forKey: key)
+            }
+
             rawServices[serviceId] = (name: sender.name, host: ipAddress, port: sender.port, type: serviceType)
             rebuildDeviceList()
             resolvingServices.removeAll { $0 === sender }

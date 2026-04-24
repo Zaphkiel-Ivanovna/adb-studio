@@ -10,7 +10,7 @@ protocol ADBService {
     func getProperties(_ properties: [String], deviceId: String) async throws -> [String: String]
     func shell(_ command: String, deviceId: String) async throws -> String
     func takeScreenshot(deviceId: String) async throws -> Data
-    func inputText(_ text: String, deviceId: String) async throws
+    func inputText(_ text: String, deviceId: String, characterDelayMs: Int) async throws
     func inputKeyEvent(_ keyCode: Int, deviceId: String) async throws
     func listReverseForwards(deviceId: String) async throws -> [PortForward]
     func createReverseForward(localPort: Int, remotePort: Int, deviceId: String) async throws
@@ -31,6 +31,9 @@ protocol ADBService {
 
     // Power Actions
     func reboot(deviceId: String, mode: RebootMode) async throws
+
+    // Server Management
+    func startServer(timeout: TimeInterval) async throws
 }
 
 enum AppListFilter {

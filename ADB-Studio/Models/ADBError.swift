@@ -14,6 +14,8 @@ enum ADBError: LocalizedError {
     case appNotFound(String)
     case uninstallFailed(String)
     case appActionFailed(String, String)
+    case serverStartFailed(String)
+    case connectServiceNotAdvertised(String)
 
     var errorDescription: String? {
         switch self {
@@ -43,6 +45,10 @@ enum ADBError: LocalizedError {
             return "Uninstall failed: \(message)"
         case .appActionFailed(let action, let message):
             return "\(action) failed: \(message)"
+        case .serverStartFailed(let message):
+            return "Failed to start ADB server: \(message)"
+        case .connectServiceNotAdvertised(let host):
+            return "Pairing succeeded but \(host) did not advertise its debugging port in time. Open Wireless debugging on the device and try connecting again."
         }
     }
 }

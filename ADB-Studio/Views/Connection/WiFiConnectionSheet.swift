@@ -5,7 +5,7 @@ struct WiFiConnectionSheet: View {
     @Environment(\.dismiss) private var dismiss
 
     let settingsStore: SettingsStore
-    let discoveryService: DeviceDiscoveryService
+    @ObservedObject var discoveryService: DeviceDiscoveryService
     let adbService: ADBService
 
     @State private var selectedTab: ConnectionTab = .scan
@@ -15,9 +15,15 @@ struct WiFiConnectionSheet: View {
     @State private var isConnecting = false
     @State private var pairingDevice: DiscoveredDevice?
 
+    @State private var pairIPAddress = ""
+    @State private var pairPort = ""
+    @State private var pairingCode = ""
+    @State private var isPairing = false
+
     enum ConnectionTab {
         case scan
         case manual
+        case pair
     }
 
     var body: some View {
@@ -27,6 +33,7 @@ struct WiFiConnectionSheet: View {
             Picker("", selection: $selectedTab) {
                 Text("Scan").tag(ConnectionTab.scan)
                 Text("Manual").tag(ConnectionTab.manual)
+                Text("Pair").tag(ConnectionTab.pair)
             }
             .pickerStyle(.segmented)
             .padding(.horizontal, 24)
@@ -39,6 +46,8 @@ struct WiFiConnectionSheet: View {
                 scanView
             case .manual:
                 manualView
+            case .pair:
+                pairView
             }
 
             Spacer()
@@ -226,6 +235,91 @@ struct WiFiConnectionSheet: View {
         }
     }
 
+    private var pairView: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            VStack(alignment: .leading, spacing: 8) {
+                Text("To pair a new device:")
+                    .fontWeight(.medium)
+
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("1. On the phone: Developer options → Wireless debugging → Pair device with pairing code")
+                    Text("2. Enter the IP, port and 6-digit code shown on the pairing screen")
+                    Text("3. After pairing, switch to Manual to connect with the port shown on the main Wireless debugging screen")
+                }
+                .font(.subheadline)
+                .foregroundColor(.secondary)
+            }
+            .padding(.horizontal, 24)
+            .padding(.top, 16)
+
+            HStack(spacing: 12) {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("IP Address")
+                        .font(.subheadline)
+                        .fontWeight(.medium)
+                    TextField("192.168.1.100", text: $pairIPAddress)
+                        .textFieldStyle(.roundedBorder)
+                }
+
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Pair Port")
+                        .font(.subheadline)
+                        .fontWeight(.medium)
+                    TextField("41931", text: $pairPort)
+                        .textFieldStyle(.roundedBorder)
+                        .frame(width: 80)
+                }
+            }
+            .padding(.horizontal, 24)
+
+            VStack(alignment: .leading, spacing: 4) {
+                Text("Pairing Code")
+                    .font(.subheadline)
+                    .fontWeight(.medium)
+                TextField("000000", text: $pairingCode)
+                    .textFieldStyle(.roundedBorder)
+                    .font(.system(size: 18, weight: .medium, design: .monospaced))
+                    .frame(width: 140)
+                    .onChange(of: pairingCode) { _, newValue in
+                        pairingCode = String(newValue.filter { $0.isNumber }.prefix(6))
+                    }
+            }
+            .padding(.horizontal, 24)
+
+            if let error = connectionError {
+                Text(error)
+                    .font(.caption)
+                    .foregroundColor(.red)
+                    .padding(.horizontal, 24)
+            }
+
+            if isPairing {
+                HStack(spacing: 8) {
+                    ProgressView().controlSize(.small)
+                    Text("Pairing…")
+                        .foregroundColor(.secondary)
+                        .font(.caption)
+                }
+                .padding(.horizontal, 24)
+            }
+
+            HStack {
+                Spacer()
+                Button("Pair") {
+                    Task { await pairManually() }
+                }
+                .buttonStyle(.borderedProminent)
+                .disabled(
+                    pairIPAddress.isEmpty
+                    || pairPort.isEmpty
+                    || pairingCode.count != 6
+                    || isPairing
+                )
+            }
+            .padding(.horizontal, 24)
+        }
+    }
+
     private var bottomBar: some View {
         HStack {
             Button("Cancel") { dismiss() }
@@ -285,6 +379,44 @@ struct WiFiConnectionSheet: View {
         }
 
         isConnecting = false
+    }
+
+    private func pairManually() async {
+        let trimmedIP = pairIPAddress.trimmingCharacters(in: .whitespaces)
+        let trimmedPairPort = pairPort.trimmingCharacters(in: .whitespaces)
+        let code = pairingCode.trimmingCharacters(in: .whitespaces)
+
+        guard !trimmedIP.isEmpty else {
+            connectionError = "Please enter an IP address"
+            return
+        }
+        guard let pairPortNum = Int(trimmedPairPort), pairPortNum > 0, pairPortNum <= 65535 else {
+            connectionError = "Please enter a valid pair port (1-65535)"
+            return
+        }
+        guard code.count == 6, code.allSatisfy(\.isNumber) else {
+            connectionError = "Pairing code must be 6 digits"
+            return
+        }
+
+        isPairing = true
+        connectionError = nil
+
+        do {
+            try await adbService.pair(address: "\(trimmedIP):\(pairPortNum)", code: code)
+
+            // Prefill Manual tab with the pair IP so the user only needs to enter the new connect port
+            ipAddress = trimmedIP
+            port = ""
+            pairingCode = ""
+            selectedTab = .manual
+        } catch let error as ADBError {
+            connectionError = error.localizedDescription
+        } catch {
+            connectionError = error.localizedDescription
+        }
+
+        isPairing = false
     }
 }
 
@@ -366,26 +498,36 @@ struct DiscoveredDeviceRow: View {
 // MARK: - PairingSheet
 
 struct PairingSheet: View {
+    enum Phase: Equatable {
+        case idle
+        case pairing
+        case waitingForConnectService
+        case connecting
+        case succeeded
+    }
+
     let device: DiscoveredDevice
     let adbService: ADBService
-    let discoveryService: DeviceDiscoveryService
+    @ObservedObject var discoveryService: DeviceDiscoveryService
     let deviceManager: DeviceManager
     let onDismiss: () -> Void
 
     @Environment(\.dismiss) private var dismiss
 
     @State private var pairingCode = ""
-    @State private var isPairing = false
-    @State private var isConnecting = false
+    @State private var phase: Phase = .idle
     @State private var error: String?
-    @State private var pairingSucceeded = false
+    @State private var pairingTask: Task<Void, Never>?
 
     private var pairingAddress: String {
         device.pairingAddress ?? device.displayAddress
     }
 
     private var isWorking: Bool {
-        isPairing || isConnecting
+        switch phase {
+        case .pairing, .waitingForConnectService, .connecting: return true
+        case .idle, .succeeded: return false
+        }
     }
 
     var body: some View {
@@ -430,71 +572,102 @@ struct PairingSheet: View {
                     .padding(.horizontal)
             }
 
-            if isConnecting {
+            switch phase {
+            case .waitingForConnectService:
                 HStack(spacing: 8) {
                     ProgressView()
                         .controlSize(.small)
-                    Text("Connecting...")
+                    Text("Finalizing connection… accept Wireless Debugging if prompted.")
+                        .foregroundColor(.secondary)
+                        .font(.caption)
+                        .multilineTextAlignment(.center)
+                }
+            case .connecting:
+                HStack(spacing: 8) {
+                    ProgressView()
+                        .controlSize(.small)
+                    Text("Connecting…")
                         .foregroundColor(.secondary)
                 }
-            } else if pairingSucceeded {
+            case .succeeded:
                 Label("Paired successfully!", systemImage: "checkmark.circle.fill")
                     .foregroundColor(.green)
+            case .idle, .pairing:
+                EmptyView()
             }
 
             HStack(spacing: 16) {
-                Button("Cancel") { onDismiss() }
-                    .keyboardShortcut(.cancelAction)
-                    .disabled(isWorking)
+                Button("Cancel") {
+                    pairingTask?.cancel()
+                    onDismiss()
+                }
+                .keyboardShortcut(.cancelAction)
+                .disabled(phase == .succeeded)
 
-                if !pairingSucceeded {
-                    Button(isPairing ? "Pairing..." : "Pair") {
+                if phase != .succeeded {
+                    Button(phase == .pairing ? "Pairing…" : "Pair") {
                         Task { await pairAndConnect() }
                     }
                     .buttonStyle(.borderedProminent)
-                    .disabled(pairingCode.count != 6 || isWorking)
+                    .disabled(pairingCode.count != 6 || phase != .idle)
                     .keyboardShortcut(.defaultAction)
                 }
             }
         }
         .padding(32)
         .frame(width: 340)
+        .onDisappear { pairingTask?.cancel() }
     }
 
     private func pairAndConnect() async {
-        isPairing = true
+        phase = .pairing
         error = nil
 
-        do {
-            try await adbService.pair(address: pairingAddress, code: pairingCode)
-            await discoveryService.markDevicePaired(device)
-            isPairing = false
+        let task = Task {
+            do {
+                try await adbService.pair(address: pairingAddress, code: pairingCode)
+                discoveryService.markDevicePaired(device)
 
-            isConnecting = true
-            await deviceManager.refresh()
+                phase = .waitingForConnectService
+                let connectAddress = try await waitForConnectAddress(deviceID: device.id, timeout: 30)
 
-            // Wait for device to advertise connect service
-            try await Task.sleep(nanoseconds: 500_000_000)
+                phase = .connecting
+                await deviceManager.refresh()
+                try await deviceManager.connect(to: connectAddress)
 
-            let connectAddress = device.connectAddress ?? "\(device.host):5555"
-            try await deviceManager.connect(to: connectAddress)
+                phase = .succeeded
+                try? await Task.sleep(nanoseconds: 500_000_000)
+                onDismiss()
+                dismiss()
 
-            pairingSucceeded = true
-            isConnecting = false
-
-            try await Task.sleep(nanoseconds: 500_000_000)
-            onDismiss()
-            dismiss()
-
-        } catch let err as ADBError {
-            error = err.localizedDescription
-            isPairing = false
-            isConnecting = false
-        } catch {
-            self.error = error.localizedDescription
-            isPairing = false
-            isConnecting = false
+            } catch is CancellationError {
+                phase = .idle
+            } catch let err as ADBError {
+                error = err.localizedDescription
+                phase = .idle
+            } catch {
+                self.error = error.localizedDescription
+                phase = .idle
+            }
         }
+        pairingTask = task
+        await task.value
+    }
+
+    /// Polls `discoveryService.discoveredDevices` until the device with `deviceID`
+    /// advertises `_adb-tls-connect._tcp`. `discoveredDevices` is updated
+    /// reactively by mDNS delegate callbacks.
+    private func waitForConnectAddress(deviceID: String, timeout: TimeInterval) async throws -> String {
+        let deadline = Date().addingTimeInterval(timeout)
+        while Date() < deadline {
+            try Task.checkCancellation()
+            if let fresh = discoveryService.discoveredDevices.first(where: { $0.id == deviceID }),
+               let address = fresh.connectAddress {
+                return address
+            }
+            try await Task.sleep(nanoseconds: 500_000_000)
+        }
+        throw ADBError.connectServiceNotAdvertised(device.host)
     }
 }
 

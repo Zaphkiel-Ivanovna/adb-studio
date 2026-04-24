@@ -6,14 +6,55 @@ struct SidebarView: View {
     @Binding var showWiFiConnectionSheet: Bool
 
     var body: some View {
-        Group {
-            if deviceManager.devices.isEmpty {
-                emptyStateView
-            } else {
-                deviceListView
+        VStack(spacing: 0) {
+            Group {
+                if deviceManager.devices.isEmpty {
+                    emptyStateView
+                } else {
+                    deviceListView
+                }
             }
+            .frame(maxHeight: .infinity)
+
+            Divider()
+            serverStatusBar
         }
         .navigationTitle("ADB Studio")
+    }
+
+    private var serverStatusBar: some View {
+        HStack(spacing: 6) {
+            if deviceManager.isStartingServer {
+                ProgressView()
+                    .controlSize(.small)
+                Text("Starting ADB Server...")
+                    .font(.caption)
+                    .foregroundColor(.orange)
+            } else if deviceManager.isServerRunning {
+                Circle()
+                    .fill(.green)
+                    .frame(width: 8, height: 8)
+                Text("ADB Server Running")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            } else {
+                Circle()
+                    .fill(.red)
+                    .frame(width: 8, height: 8)
+                Text("ADB Server Stopped")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                Spacer()
+                Button("Start") {
+                    Task { await deviceManager.ensureServerRunning() }
+                }
+                .font(.caption)
+                .buttonStyle(.borderless)
+            }
+            Spacer(minLength: 0)
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 8)
     }
 
     private var deviceListView: some View {

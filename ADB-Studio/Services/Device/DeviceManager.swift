@@ -8,6 +8,8 @@ final class DeviceManager: ObservableObject {
     @Published private(set) var lastError: ADBError?
     @Published private(set) var isADBAvailable = false
     @Published private(set) var hasCheckedADB = false
+    @Published private(set) var isServerRunning = false
+    @Published private(set) var isStartingServer = false
 
     private let adbService: ADBService
     private let deviceIdentifier: DeviceIdentifier
@@ -33,6 +35,7 @@ final class DeviceManager: ObservableObject {
         autoRefreshTask?.cancel()
         autoRefreshTask = Task {
             await checkADBAvailability()
+            await ensureServerRunning()
 
             while !Task.isCancelled {
                 await refresh()
@@ -67,10 +70,7 @@ final class DeviceManager: ObservableObject {
         do {
             var newDevices = try await adbService.listDevices()
 
-            // Clean up stale offline WiFi connections
             await cleanupOfflineWiFiDevices(newDevices)
-
-            // Re-fetch after cleanup in case list changed
             newDevices = try await adbService.listDevices()
 
             newDevices = await withTaskGroup(of: (Int, Device).self) { group in
@@ -91,11 +91,14 @@ final class DeviceManager: ObservableObject {
             newDevices = mergeWithHistory(newDevices)
             updateHistory(newDevices)
             devices = deduplicateDevices(newDevices)
+            isServerRunning = true
 
         } catch let error as ADBError {
             lastError = error
+            isServerRunning = false
         } catch {
             lastError = .commandFailed("refresh", -1)
+            isServerRunning = false
         }
 
         isRefreshing = false
@@ -151,19 +154,33 @@ final class DeviceManager: ObservableObject {
         devices.first { $0.id == id }
     }
 
+    func ensureServerRunning() async {
+        guard isADBAvailable else { return }
+
+        isStartingServer = true
+        do {
+            try await adbService.startServer(timeout: 10)
+            isServerRunning = true
+        } catch let error as ADBError {
+            isServerRunning = false
+            lastError = error
+        } catch {
+            isServerRunning = false
+            lastError = .serverStartFailed(error.localizedDescription)
+        }
+        isStartingServer = false
+    }
+
     func clearError() {
         lastError = nil
     }
 
-    /// Disconnects stale offline WiFi devices to clean up ADB's device list.
-    /// A WiFi device is considered stale if it's offline and not useful anymore.
     private func cleanupOfflineWiFiDevices(_ devices: [Device]) async {
         let offlineWiFiDevices = devices.filter { device in
             device.state != .device && device.connection.isWiFiBased
         }
 
         for device in offlineWiFiDevices {
-            // Try to disconnect this stale offline WiFi connection
             try? await adbService.disconnect(from: device.adbId)
         }
     }
