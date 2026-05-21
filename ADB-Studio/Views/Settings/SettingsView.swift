@@ -2,9 +2,20 @@ import SwiftUI
 
 struct SettingsView: View {
     @ObservedObject var settingsStore: SettingsStore
+    let historyStore: DeviceHistoryStore
+
+    @StateObject private var portForwardSettingsViewModel: PortForwardSettingsViewModel
 
     private let minHeight: CGFloat = 320
     private let maxHeight: CGFloat = 450
+
+    init(settingsStore: SettingsStore, historyStore: DeviceHistoryStore) {
+        self.settingsStore = settingsStore
+        self.historyStore = historyStore
+        _portForwardSettingsViewModel = StateObject(
+            wrappedValue: PortForwardSettingsViewModel(historyStore: historyStore)
+        )
+    }
 
     var body: some View {
         TabView {
@@ -34,6 +45,13 @@ struct SettingsView: View {
             }
             .tabItem {
                 Label("Mirroring", systemImage: "display")
+            }
+
+            SettingsTabContainer(minHeight: minHeight, maxHeight: maxHeight) {
+                PortForwardSettingsTab(viewModel: portForwardSettingsViewModel)
+            }
+            .tabItem {
+                Label("Port Forwarding", systemImage: "arrow.left.arrow.right")
             }
 
             AboutSettingsTab()
@@ -543,5 +561,5 @@ struct SettingsRow<Content: View>: View {
 }
 
 #Preview {
-    SettingsView(settingsStore: SettingsStore())
+    SettingsView(settingsStore: SettingsStore(), historyStore: DeviceHistoryStore())
 }

@@ -13,6 +13,7 @@ final class DependencyContainer: ObservableObject {
     let discoveryService: DeviceDiscoveryService
     let updateService: UpdateService
     let mirroringManager: MirroringManager
+    let portForwardAutoApplyManager: PortForwardAutoApplyManager
 
     private var cancellables = Set<AnyCancellable>()
 
@@ -32,6 +33,11 @@ final class DependencyContainer: ObservableObject {
         self.discoveryService = DeviceDiscoveryService(historyStore: historyStore)
         self.updateService = UpdateService()
         self.mirroringManager = MirroringManager(adbService: adbService, deviceManager: deviceManager, settingsStore: settingsStore)
+        self.portForwardAutoApplyManager = PortForwardAutoApplyManager(
+            adbService: adbService,
+            deviceManager: deviceManager,
+            historyStore: historyStore
+        )
 
         setupSettingsObserver()
     }
@@ -53,6 +59,7 @@ final class DependencyContainer: ObservableObject {
     func shutdown() async {
         deviceManager.stopMonitoring()
         await mirroringManager.stopAll()
+        await portForwardAutoApplyManager.stop()
     }
 
     private func setupSettingsObserver() {

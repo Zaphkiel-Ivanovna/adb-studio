@@ -4,6 +4,15 @@ struct PortForwardView: View {
     @ObservedObject var viewModel: DeviceDetailViewModel
 
     var body: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            activeForwardsCard
+
+            PortForwardPresetsSection(viewModel: viewModel)
+        }
+        .onAppear { viewModel.loadPresets() }
+    }
+
+    private var activeForwardsCard: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
                 Text("Port Forwarding")
@@ -133,7 +142,8 @@ struct PortForwardRow: View {
             deviceIdentifier: DeviceIdentifier(adbService: adbService),
             historyStore: DeviceHistoryStore(),
             settingsStore: settingsStore
-        )
+        ),
+        historyStore: DeviceHistoryStore()
     ))
     .padding()
 }
