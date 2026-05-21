@@ -1,5 +1,7 @@
 import Foundation
 
+// MARK: - Public Types
+
 struct ShellResult {
     let output: String
     let errorOutput: String
@@ -17,150 +19,87 @@ protocol ShellExecuting {
     func executeRaw(_ command: String, arguments: [String], timeout: TimeInterval) async throws -> Data
 }
 
-/// Thread-safe data accumulator for shell output
-private final class DataAccumulator: @unchecked Sendable {
-    private let lock = NSLock()
-    private var data = Data()
-
-    func append(_ newData: Data) {
-        lock.lock()
-        data.append(newData)
-        lock.unlock()
-    }
-
-    func finalize(with finalData: Data) -> Data {
-        lock.lock()
-        data.append(finalData)
-        let result = data
-        lock.unlock()
-        return result
-    }
-}
+// MARK: - ShellExecutor
 
 final class ShellExecutor: ShellExecuting {
 
+    // MARK: - Public API
+
     func execute(_ command: String, arguments: [String] = [], timeout: TimeInterval = 30.0) async throws -> ShellResult {
-        try await withCheckedThrowingContinuation { continuation in
-            let process = Process()
-            let outputPipe = Pipe()
-            let errorPipe = Pipe()
+        let process = Process()
+        let outputPipe = Pipe()
+        let errorPipe = Pipe()
 
-            process.executableURL = URL(fileURLWithPath: command)
-            process.arguments = arguments
-            process.standardOutput = outputPipe
-            process.standardError = errorPipe
-            process.environment = Self.buildEnvironment()
+        process.executableURL = URL(fileURLWithPath: command)
+        process.arguments = arguments
+        process.standardOutput = outputPipe
+        process.standardError = errorPipe
+        process.environment = Self.buildEnvironment()
 
-            var timedOut = false
-            let timeoutWorkItem = DispatchWorkItem {
-                timedOut = true
-                process.terminate()
-            }
+        try process.run()
 
-            DispatchQueue.global().asyncAfter(deadline: .now() + timeout, execute: timeoutWorkItem)
+        let timedOut = await Self.raceProcessAgainstTimeout(process, timeout: timeout)
 
-            do {
-                try process.run()
-                process.waitUntilExit()
-
-                timeoutWorkItem.cancel()
-
-                if timedOut {
-                    print("⏱️ TIMEOUT after \(timeout)s: \(command) \(arguments.joined(separator: " "))")
-                    continuation.resume(throwing: ADBError.timeout)
-                    return
-                }
-
-                let outputData = outputPipe.fileHandleForReading.readDataToEndOfFile()
-                let errorData = errorPipe.fileHandleForReading.readDataToEndOfFile()
-
-                let result = ShellResult(
-                    output: String(data: outputData, encoding: .utf8)?.trimmingCharacters(in: .whitespacesAndNewlines) ?? "",
-                    errorOutput: String(data: errorData, encoding: .utf8)?.trimmingCharacters(in: .whitespacesAndNewlines) ?? "",
-                    exitCode: process.terminationStatus
-                )
-
-                continuation.resume(returning: result)
-            } catch {
-                timeoutWorkItem.cancel()
-                continuation.resume(throwing: error)
-            }
+        if timedOut {
+            print("⏱️ TIMEOUT after \(timeout)s: \(command) \(arguments.joined(separator: " "))")
+            throw ADBError.timeout
         }
+
+        let outputData = outputPipe.fileHandleForReading.readDataToEndOfFile()
+        let errorData = errorPipe.fileHandleForReading.readDataToEndOfFile()
+
+        return ShellResult(
+            output: String(data: outputData, encoding: .utf8)?.trimmingCharacters(in: .whitespacesAndNewlines) ?? "",
+            errorOutput: String(data: errorData, encoding: .utf8)?.trimmingCharacters(in: .whitespacesAndNewlines) ?? "",
+            exitCode: process.terminationStatus
+        )
     }
 
     func executeRaw(_ command: String, arguments: [String] = [], timeout: TimeInterval = 30.0) async throws -> Data {
-        try await withCheckedThrowingContinuation { continuation in
-            let process = Process()
-            let outputPipe = Pipe()
-            let errorPipe = Pipe()
+        let process = Process()
+        let outputPipe = Pipe()
+        let errorPipe = Pipe()
 
-            process.executableURL = URL(fileURLWithPath: command)
-            process.arguments = arguments
-            process.standardOutput = outputPipe
-            process.standardError = errorPipe
-            process.environment = Self.buildEnvironment()
+        process.executableURL = URL(fileURLWithPath: command)
+        process.arguments = arguments
+        process.standardOutput = outputPipe
+        process.standardError = errorPipe
+        process.environment = Self.buildEnvironment()
 
-            var timedOut = false
-
-            let timeoutWorkItem = DispatchWorkItem {
-                timedOut = true
-                process.terminate()
-            }
-
-            let accumulator = DataAccumulator()
-
-            // Drain pipe buffer while process runs to avoid deadlock
-            let outputHandle = outputPipe.fileHandleForReading
-            outputHandle.readabilityHandler = { handle in
-                let data = handle.availableData
-                if !data.isEmpty {
-                    accumulator.append(data)
-                }
-            }
-
-            DispatchQueue.global().asyncAfter(deadline: .now() + timeout, execute: timeoutWorkItem)
-
-            do {
-                try process.run()
-                process.waitUntilExit()
-
-                outputHandle.readabilityHandler = nil
-
-                let finalData = accumulator.finalize(with: outputHandle.readDataToEndOfFile())
-
-                timeoutWorkItem.cancel()
-
-                if timedOut {
-                    print("⏱️ RAW TIMEOUT after \(timeout)s: \(command) \(arguments.joined(separator: " "))")
-                    continuation.resume(throwing: ADBError.timeout)
-                    return
-                }
-
-                if process.terminationStatus != 0 {
-                    continuation.resume(throwing: ADBError.commandFailed(arguments.joined(separator: " "), process.terminationStatus))
-                    return
-                }
-
-                continuation.resume(returning: finalData)
-            } catch {
-                timeoutWorkItem.cancel()
-                outputHandle.readabilityHandler = nil
-                continuation.resume(throwing: error)
+        let accumulator = DataAccumulator()
+        let outputHandle = outputPipe.fileHandleForReading
+        outputHandle.readabilityHandler = { handle in
+            let data = handle.availableData
+            if !data.isEmpty {
+                accumulator.append(data)
             }
         }
+
+        do {
+            try process.run()
+        } catch {
+            outputHandle.readabilityHandler = nil
+            throw error
+        }
+
+        let timedOut = await Self.raceProcessAgainstTimeout(process, timeout: timeout)
+
+        outputHandle.readabilityHandler = nil
+        let finalData = accumulator.finalize(with: outputHandle.readDataToEndOfFile())
+
+        if timedOut {
+            print("⏱️ RAW TIMEOUT after \(timeout)s: \(command) \(arguments.joined(separator: " "))")
+            throw ADBError.timeout
+        }
+
+        if process.terminationStatus != 0 {
+            throw ADBError.commandFailed(arguments.joined(separator: " "), process.terminationStatus)
+        }
+
+        return finalData
     }
 
-    private static func buildEnvironment() -> [String: String] {
-        var env = ProcessInfo.processInfo.environment
-        let additionalPaths = [
-            "/usr/local/bin",
-            "/opt/homebrew/bin",
-            "/Users/\(NSUserName())/Library/Android/sdk/platform-tools"
-        ]
-        let currentPath = env["PATH"] ?? ""
-        env["PATH"] = (additionalPaths + [currentPath]).joined(separator: ":")
-        return env
-    }
+    // MARK: - ADB Discovery
 
     static func findADBPath() -> String? {
         let possiblePaths = [
@@ -169,10 +108,8 @@ final class ShellExecutor: ShellExecuting {
             "/Users/\(NSUserName())/Library/Android/sdk/platform-tools/adb"
         ]
 
-        for path in possiblePaths {
-            if FileManager.default.fileExists(atPath: path) {
-                return path
-            }
+        for path in possiblePaths where FileManager.default.fileExists(atPath: path) {
+            return path
         }
 
         let process = Process()
@@ -192,5 +129,97 @@ final class ShellExecutor: ShellExecuting {
         } catch {}
 
         return nil
+    }
+
+    // MARK: - Private Helpers
+
+    /// Returns true if `process` (already launched) had to be terminated for exceeding `timeout`.
+    private static func raceProcessAgainstTimeout(_ process: Process, timeout: TimeInterval) async -> Bool {
+        await withTaskGroup(of: TimeoutOutcome.self, returning: Bool.self) { group in
+            group.addTask {
+                await process.waitUntilExitAsync()
+                return .finished
+            }
+            group.addTask {
+                try? await Task.sleep(for: .seconds(timeout))
+                if Task.isCancelled { return .finished }
+                if process.isRunning {
+                    process.terminate()
+                    await process.waitUntilExitAsync()
+                    return .timedOut
+                }
+                return .finished
+            }
+            let first = await group.next() ?? .finished
+            group.cancelAll()
+            for await _ in group {}
+            return first == .timedOut
+        }
+    }
+
+    private static func buildEnvironment() -> [String: String] {
+        var env = ProcessInfo.processInfo.environment
+        let additionalPaths = [
+            "/usr/local/bin",
+            "/opt/homebrew/bin",
+            "/Users/\(NSUserName())/Library/Android/sdk/platform-tools"
+        ]
+        let currentPath = env["PATH"] ?? ""
+        env["PATH"] = (additionalPaths + [currentPath]).joined(separator: ":")
+        return env
+    }
+}
+
+// MARK: - File-Private Helpers
+
+private enum TimeoutOutcome { case finished, timedOut }
+
+/// Thread-safe accumulator for streamed shell output.
+private final class DataAccumulator: @unchecked Sendable {
+    private let lock = NSLock()
+    private var data = Data()
+
+    func append(_ newData: Data) {
+        lock.lock()
+        data.append(newData)
+        lock.unlock()
+    }
+
+    func finalize(with finalData: Data) -> Data {
+        lock.lock()
+        data.append(finalData)
+        let result = data
+        lock.unlock()
+        return result
+    }
+}
+
+/// Resumes a `CheckedContinuation` exactly once across concurrent callers.
+private final class ContinuationLatch: @unchecked Sendable {
+    private let lock = NSLock()
+    private var resumed = false
+    private let continuation: CheckedContinuation<Void, Never>
+
+    init(_ continuation: CheckedContinuation<Void, Never>) {
+        self.continuation = continuation
+    }
+
+    func resume() {
+        lock.lock()
+        defer { lock.unlock() }
+        guard !resumed else { return }
+        resumed = true
+        continuation.resume()
+    }
+}
+
+private extension Process {
+    /// Awaits exit, handling the race where the process ends before the handler is installed.
+    func waitUntilExitAsync() async {
+        await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
+            let latch = ContinuationLatch(continuation)
+            self.terminationHandler = { _ in latch.resume() }
+            if !self.isRunning { latch.resume() }
+        }
     }
 }
