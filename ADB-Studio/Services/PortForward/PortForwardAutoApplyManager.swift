@@ -31,9 +31,7 @@ final class PortForwardAutoApplyManager: ObservableObject {
     func stop() async {
         watchTask?.cancel()
         watchTask = nil
-        let tasks = pendingApplyTasks.values
-        for t in tasks { t.cancel() }
-        for t in tasks { _ = await t.value }
+        for task in pendingApplyTasks.values { task.cancel() }
         pendingApplyTasks.removeAll()
     }
 
@@ -45,6 +43,13 @@ final class PortForwardAutoApplyManager: ObservableObject {
         )
 
         appliedSerials = appliedSerials.intersection(connectedSerials)
+
+        let hasAutoApplyWork = connectedSerials.contains { serial in
+            !historyStore.presets(for: serial).filter(\.autoApply).isEmpty
+        }
+        if !hasAutoApplyWork {
+            lastErrorMessage = nil
+        }
 
         for device in devices where device.state == .device {
             guard let serial = device.persistentSerial,

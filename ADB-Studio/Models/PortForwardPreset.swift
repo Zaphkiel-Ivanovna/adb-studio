@@ -15,7 +15,7 @@ struct PortForwardPreset: Codable, Identifiable, Equatable, Hashable {
         autoApply: Bool = false
     ) {
         self.id = id
-        self.name = name?.trimmingCharacters(in: .whitespaces).nilIfEmpty
+        self.name = name?.trimmedOrNil()
         self.localPort = localPort
         self.remotePort = remotePort
         self.autoApply = autoApply
@@ -38,7 +38,8 @@ struct PortForwardPreset: Codable, Identifiable, Equatable, Hashable {
 }
 
 extension String {
-    fileprivate var nilIfEmpty: String? {
-        isEmpty ? nil : self
+    func trimmedOrNil() -> String? {
+        let trimmed = trimmingCharacters(in: .whitespaces)
+        return trimmed.isEmpty ? nil : trimmed
     }
 }

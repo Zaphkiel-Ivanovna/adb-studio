@@ -380,8 +380,7 @@ final class DeviceDetailViewModel: ObservableObject {
     func renamePreset(_ preset: PortForwardPreset, to name: String) {
         guard let key = presetKey else { return }
         var updated = preset
-        let trimmed = name.trimmingCharacters(in: .whitespaces)
-        updated.name = trimmed.isEmpty ? nil : trimmed
+        updated.name = name.trimmedOrNil()
         historyStore.updatePreset(updated, for: key)
         presets = historyStore.presets(for: key)
     }

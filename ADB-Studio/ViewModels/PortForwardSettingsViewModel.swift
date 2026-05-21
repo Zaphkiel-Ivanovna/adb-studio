@@ -25,8 +25,7 @@ final class PortForwardSettingsViewModel: ObservableObject {
 
     func rename(_ preset: PortForwardPreset, to name: String, for serial: String) {
         var updated = preset
-        let trimmed = name.trimmingCharacters(in: .whitespaces)
-        updated.name = trimmed.isEmpty ? nil : trimmed
+        updated.name = name.trimmedOrNil()
         historyStore.updatePreset(updated, for: serial)
         reload()
     }
