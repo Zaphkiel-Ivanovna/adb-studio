@@ -22,7 +22,8 @@ struct ContentView: View {
                     device: device,
                     adbService: container.adbService,
                     screenshotService: container.screenshotService,
-                    deviceManager: deviceManager
+                    deviceManager: deviceManager,
+                    historyStore: container.historyStore
                 )
             } else {
                 EmptyDetailView()

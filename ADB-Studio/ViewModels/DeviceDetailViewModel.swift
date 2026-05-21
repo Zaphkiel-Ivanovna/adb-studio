@@ -13,6 +13,10 @@ final class DeviceDetailViewModel: ObservableObject {
     @Published var newPortLocal = ""
     @Published var newPortRemote = ""
     @Published var isAddingPort = false
+    @Published var saveAsPreset = false
+    @Published var newPresetName = ""
+    @Published var newPresetAutoApply = false
+    @Published private(set) var presets: [PortForwardPreset] = []
     @Published var errorMessage: String?
     @Published var successMessage: String?
     @Published var isEditingName = false
@@ -36,13 +40,29 @@ final class DeviceDetailViewModel: ObservableObject {
     private let adbService: ADBService
     private let screenshotService: ScreenshotService
     private let deviceManager: DeviceManager
+    private let historyStore: DeviceHistoryStore
 
-    init(device: Device, adbService: ADBService, screenshotService: ScreenshotService, deviceManager: DeviceManager) {
+    init(
+        device: Device,
+        adbService: ADBService,
+        screenshotService: ScreenshotService,
+        deviceManager: DeviceManager,
+        historyStore: DeviceHistoryStore
+    ) {
         self.device = device
         self.adbService = adbService
         self.screenshotService = screenshotService
         self.deviceManager = deviceManager
+        self.historyStore = historyStore
         self.editedName = device.customName ?? ""
+    }
+
+    var canPersistPresets: Bool {
+        device.persistentSerial != nil
+    }
+
+    private var presetKey: String? {
+        device.persistentSerial
     }
 
     func updateDevice(_ device: Device) {
@@ -146,11 +166,22 @@ final class DeviceDetailViewModel: ObservableObject {
 
         do {
             try await adbService.createReverseForward(localPort: local, remotePort: remote, deviceId: device.bestAdbId)
+
+            if saveAsPreset, let key = presetKey {
+                let preset = PortForwardPreset(
+                    name: newPresetName,
+                    localPort: local,
+                    remotePort: remote,
+                    autoApply: newPresetAutoApply
+                )
+                historyStore.addPreset(preset, for: key)
+                presets = historyStore.presets(for: key)
+            }
+
             showAddPortSheet = false
-            newPortLocal = ""
-            newPortRemote = ""
+            resetAddPortInputs()
             await loadPortForwards()
-            showSuccess("Port forward created")
+            showSuccess(saveAsPreset ? "Port forward created and saved" : "Port forward created")
         } catch let error as ADBError {
             errorMessage = error.localizedDescription
         } catch {
@@ -158,6 +189,14 @@ final class DeviceDetailViewModel: ObservableObject {
         }
 
         isAddingPort = false
+    }
+
+    func resetAddPortInputs() {
+        newPortLocal = ""
+        newPortRemote = ""
+        saveAsPreset = false
+        newPresetName = ""
+        newPresetAutoApply = false
     }
 
     func removePortForward(_ forward: PortForward) async {
@@ -318,6 +357,76 @@ final class DeviceDetailViewModel: ObservableObject {
         isInstallingAPK = false
         apkInstallProgress = ""
         apkInstallResult = nil
+    }
+
+    // MARK: - Port Presets
+
+    func loadPresets() {
+        guard let key = presetKey else {
+            presets = []
+            return
+        }
+        presets = historyStore.presets(for: key)
+    }
+
+    func togglePresetAutoApply(_ preset: PortForwardPreset) {
+        guard let key = presetKey else { return }
+        var updated = preset
+        updated.autoApply.toggle()
+        historyStore.updatePreset(updated, for: key)
+        presets = historyStore.presets(for: key)
+    }
+
+    func renamePreset(_ preset: PortForwardPreset, to name: String) {
+        guard let key = presetKey else { return }
+        var updated = preset
+        let trimmed = name.trimmingCharacters(in: .whitespaces)
+        updated.name = trimmed.isEmpty ? nil : trimmed
+        historyStore.updatePreset(updated, for: key)
+        presets = historyStore.presets(for: key)
+    }
+
+    func removePreset(_ preset: PortForwardPreset) {
+        guard let key = presetKey else { return }
+        historyStore.removePreset(id: preset.id, for: key)
+        presets = historyStore.presets(for: key)
+    }
+
+    func applyPreset(_ preset: PortForwardPreset) async {
+        guard (1...65535).contains(preset.localPort), (1...65535).contains(preset.remotePort) else {
+            errorMessage = "Preset \"\(preset.displayName)\" has an invalid port range."
+            return
+        }
+        errorMessage = nil
+        do {
+            try await adbService.createReverseForward(
+                localPort: preset.localPort,
+                remotePort: preset.remotePort,
+                deviceId: device.bestAdbId
+            )
+            await loadPortForwards()
+            showSuccess("Applied \(preset.displayName)")
+        } catch let error as ADBError {
+            errorMessage = error.localizedDescription
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
+
+    func saveActiveForwardAsPreset(_ forward: PortForward, name: String?, autoApply: Bool) {
+        guard let key = presetKey else {
+            errorMessage = "This device has no persistent serial; presets cannot be saved."
+            return
+        }
+        let preset = PortForwardPreset(
+            name: name,
+            localPort: forward.localPort,
+            remotePort: forward.remotePort,
+            autoApply: autoApply
+        )
+        historyStore.addPreset(preset, for: key)
+        presets = historyStore.presets(for: key)
+        showSuccess("Saved as preset")
     }
 
     private func showSuccess(_ message: String) {

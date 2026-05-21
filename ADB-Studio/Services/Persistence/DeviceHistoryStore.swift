@@ -51,6 +51,48 @@ final class DeviceHistoryStore {
         persist()
     }
 
+    // MARK: - Port Forward Presets
+
+    func presets(for persistentSerial: String) -> [PortForwardPreset] {
+        cache[persistentSerial]?.portForwardPresets ?? []
+    }
+
+    func setPresets(_ presets: [PortForwardPreset], for persistentSerial: String) {
+        if var history = cache[persistentSerial] {
+            history.portForwardPresets = presets
+            cache[persistentSerial] = history
+        } else {
+            cache[persistentSerial] = DeviceHistory(
+                persistentSerial: persistentSerial,
+                portForwardPresets: presets
+            )
+        }
+        persist()
+    }
+
+    func addPreset(_ preset: PortForwardPreset, for persistentSerial: String) {
+        var current = presets(for: persistentSerial)
+        current.append(preset)
+        setPresets(current, for: persistentSerial)
+    }
+
+    func updatePreset(_ preset: PortForwardPreset, for persistentSerial: String) {
+        var current = presets(for: persistentSerial)
+        guard let idx = current.firstIndex(where: { $0.id == preset.id }) else { return }
+        current[idx] = preset
+        setPresets(current, for: persistentSerial)
+    }
+
+    func removePreset(id: UUID, for persistentSerial: String) {
+        var current = presets(for: persistentSerial)
+        current.removeAll { $0.id == id }
+        setPresets(current, for: persistentSerial)
+    }
+
+    func devicesWithPresets() -> [DeviceHistory] {
+        cache.values.filter { !$0.portForwardPresets.isEmpty }
+    }
+
     private func loadCache() {
         guard let data = defaults.data(forKey: historyKey) else {
             return

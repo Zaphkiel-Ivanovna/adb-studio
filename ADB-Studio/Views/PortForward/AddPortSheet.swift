@@ -71,6 +71,28 @@ struct AddPortSheet: View {
                         }
                     }
                 }
+
+                Divider()
+
+                VStack(alignment: .leading, spacing: 10) {
+                    Toggle("Save as preset", isOn: $viewModel.saveAsPreset)
+                        .toggleStyle(.checkbox)
+                        .disabled(!viewModel.canPersistPresets)
+
+                    if viewModel.saveAsPreset {
+                        TextField("Name (optional)", text: $viewModel.newPresetName)
+                            .textFieldStyle(.roundedBorder)
+
+                        Toggle("Auto-apply on connect", isOn: $viewModel.newPresetAutoApply)
+                            .toggleStyle(.checkbox)
+                    }
+
+                    if !viewModel.canPersistPresets {
+                        Text("This device has no persistent serial; presets cannot be saved.")
+                            .font(.caption2)
+                            .foregroundColor(.secondary)
+                    }
+                }
             }
 
             if let error = viewModel.errorMessage {
@@ -83,8 +105,7 @@ struct AddPortSheet: View {
 
             HStack {
                 Button("Cancel") {
-                    viewModel.newPortLocal = ""
-                    viewModel.newPortRemote = ""
+                    viewModel.resetAddPortInputs()
                     viewModel.errorMessage = nil
                     dismiss()
                 }
@@ -102,7 +123,7 @@ struct AddPortSheet: View {
             }
         }
         .padding(24)
-        .frame(width: 360, height: 340)
+        .frame(width: 380, height: viewModel.saveAsPreset ? 460 : 380)
     }
 }
 
@@ -143,6 +164,7 @@ struct PresetButton: View {
             deviceIdentifier: DeviceIdentifier(adbService: adbService),
             historyStore: DeviceHistoryStore(),
             settingsStore: settingsStore
-        )
+        ),
+        historyStore: DeviceHistoryStore()
     ))
 }

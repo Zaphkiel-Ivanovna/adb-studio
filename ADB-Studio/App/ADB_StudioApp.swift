@@ -40,7 +40,10 @@ struct ADB_StudioApp: App {
         }
 
         Settings {
-            SettingsView(settingsStore: container.settingsStore)
+            SettingsView(
+                settingsStore: container.settingsStore,
+                historyStore: container.historyStore
+            )
         }
 
         WindowGroup(id: "mirror", for: String.self) { $deviceId in

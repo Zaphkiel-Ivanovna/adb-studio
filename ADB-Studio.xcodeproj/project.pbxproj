@@ -68,6 +68,12 @@
 		E00000010000000000000060 /* MirroringToolbar.swift in Sources */ = {isa = PBXBuildFile; fileRef = E00000020000000000000060 /* MirroringToolbar.swift */; };
 		E00000010000000000000061 /* MirroringShortcutsOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = E00000020000000000000061 /* MirroringShortcutsOverlay.swift */; };
 		E00000010000000000000062 /* WindowAccessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = E00000020000000000000062 /* WindowAccessor.swift */; };
+		E00000010000000000000063 /* PortForwardPreset.swift in Sources */ = {isa = PBXBuildFile; fileRef = E00000020000000000000063 /* PortForwardPreset.swift */; };
+		E00000010000000000000064 /* PortForwardAutoApplyManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E00000020000000000000064 /* PortForwardAutoApplyManager.swift */; };
+		E00000010000000000000065 /* PortForwardPresetsSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = E00000020000000000000065 /* PortForwardPresetsSection.swift */; };
+		E00000010000000000000066 /* PortForwardSettingsTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = E00000020000000000000066 /* PortForwardSettingsTab.swift */; };
+		E00000010000000000000067 /* PortForwardPresetRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E00000020000000000000067 /* PortForwardPresetRowView.swift */; };
+		E00000010000000000000068 /* PortForwardSettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E00000020000000000000068 /* PortForwardSettingsViewModel.swift */; };
 		E00000010000000000000057 /* scrcpy-server in Resources */ = {isa = PBXBuildFile; fileRef = E00000020000000000000057 /* scrcpy-server */; };
 		E00000010000000000000058 /* scrcpy-license in Resources */ = {isa = PBXBuildFile; fileRef = E00000020000000000000058 /* scrcpy-license */; };
 		FCC1383DCF24102D2B126FD5 /* InstalledAppsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CED2523D7F78C0B0CCE9EF28 /* InstalledAppsView.swift */; };
@@ -137,6 +143,12 @@
 		E00000020000000000000060 /* MirroringToolbar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MirroringToolbar.swift; sourceTree = "<group>"; };
 		E00000020000000000000061 /* MirroringShortcutsOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MirroringShortcutsOverlay.swift; sourceTree = "<group>"; };
 		E00000020000000000000062 /* WindowAccessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WindowAccessor.swift; sourceTree = "<group>"; };
+		E00000020000000000000063 /* PortForwardPreset.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PortForwardPreset.swift; sourceTree = "<group>"; };
+		E00000020000000000000064 /* PortForwardAutoApplyManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PortForwardAutoApplyManager.swift; sourceTree = "<group>"; };
+		E00000020000000000000065 /* PortForwardPresetsSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PortForwardPresetsSection.swift; sourceTree = "<group>"; };
+		E00000020000000000000066 /* PortForwardSettingsTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PortForwardSettingsTab.swift; sourceTree = "<group>"; };
+		E00000020000000000000067 /* PortForwardPresetRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PortForwardPresetRowView.swift; sourceTree = "<group>"; };
+		E00000020000000000000068 /* PortForwardSettingsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PortForwardSettingsViewModel.swift; sourceTree = "<group>"; };
 		E00000020000000000000057 /* scrcpy-server */ = {isa = PBXFileReference; lastKnownFileType = file; path = "scrcpy-server"; sourceTree = "<group>"; };
 		E00000020000000000000058 /* scrcpy-license */ = {isa = PBXFileReference; lastKnownFileType = folder; path = "scrcpy-license"; sourceTree = "<group>"; };
 		E00000030000000000000001 /* ADB-Studio.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "ADB-Studio.app"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -209,6 +221,7 @@
 				E00000020000000000000003 /* Device.swift */,
 				E00000020000000000000004 /* DeviceConnection.swift */,
 				E00000020000000000000005 /* PortForward.swift */,
+				E00000020000000000000063 /* PortForwardPreset.swift */,
 				E00000020000000000000006 /* DeviceHistory.swift */,
 				E00000020000000000000007 /* ADBError.swift */,
 				E00000020000000000000031 /* AppSettings.swift */,
@@ -227,16 +240,26 @@
 				E00000050000000000000011 /* Media */,
 				E00000050000000000000024 /* Mirroring */,
 				E00000050000000000000012 /* Persistence */,
+				E00000050000000000000032 /* PortForward */,
 				E00000050000000000000013 /* Shell */,
 				E00000050000000000000022 /* Updates */,
 			);
 			path = Services;
 			sourceTree = "<group>";
 		};
+		E00000050000000000000032 /* PortForward */ = {
+			isa = PBXGroup;
+			children = (
+				E00000020000000000000064 /* PortForwardAutoApplyManager.swift */,
+			);
+			path = PortForward;
+			sourceTree = "<group>";
+		};
 		E00000050000000000000007 /* ViewModels */ = {
 			isa = PBXGroup;
 			children = (
 				E00000020000000000000017 /* DeviceDetailViewModel.swift */,
+				E00000020000000000000068 /* PortForwardSettingsViewModel.swift */,
 				D1CA7078B945077C30D30D25 /* InstalledAppsViewModel.swift */,
 			);
 			path = ViewModels;
@@ -344,6 +367,8 @@
 			children = (
 				E00000020000000000000026 /* PortForwardView.swift */,
 				E00000020000000000000027 /* AddPortSheet.swift */,
+				E00000020000000000000065 /* PortForwardPresetsSection.swift */,
+				E00000020000000000000067 /* PortForwardPresetRowView.swift */,
 			);
 			path = PortForward;
 			sourceTree = "<group>";
@@ -360,6 +385,7 @@
 			isa = PBXGroup;
 			children = (
 				E00000020000000000000033 /* SettingsView.swift */,
+				E00000020000000000000066 /* PortForwardSettingsTab.swift */,
 			);
 			path = Settings;
 			sourceTree = "<group>";
@@ -602,6 +628,12 @@
 				E00000010000000000000060 /* MirroringToolbar.swift in Sources */,
 				E00000010000000000000061 /* MirroringShortcutsOverlay.swift in Sources */,
 				E00000010000000000000062 /* WindowAccessor.swift in Sources */,
+				E00000010000000000000063 /* PortForwardPreset.swift in Sources */,
+				E00000010000000000000064 /* PortForwardAutoApplyManager.swift in Sources */,
+				E00000010000000000000065 /* PortForwardPresetsSection.swift in Sources */,
+				E00000010000000000000066 /* PortForwardSettingsTab.swift in Sources */,
+				E00000010000000000000067 /* PortForwardPresetRowView.swift in Sources */,
+				E00000010000000000000068 /* PortForwardSettingsViewModel.swift in Sources */,
 				D33D7E38DA7214CCE1AF2FE7 /* InstalledApp.swift in Sources */,
 				B4A0E97B24E46EEBF0EF6620 /* InstalledAppsViewModel.swift in Sources */,
 				FCC1383DCF24102D2B126FD5 /* InstalledAppsView.swift in Sources */,

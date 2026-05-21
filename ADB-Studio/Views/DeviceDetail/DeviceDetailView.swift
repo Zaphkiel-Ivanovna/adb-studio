@@ -27,20 +27,29 @@ struct DeviceDetailView: View {
     let adbService: ADBService
     let screenshotService: ScreenshotService
     let deviceManager: DeviceManager
+    let historyStore: DeviceHistoryStore
 
     @StateObject private var viewModel: DeviceDetailViewModel
     @State private var selectedTab: DeviceDetailTab = .info
 
-    init(device: Device, adbService: ADBService, screenshotService: ScreenshotService, deviceManager: DeviceManager) {
+    init(
+        device: Device,
+        adbService: ADBService,
+        screenshotService: ScreenshotService,
+        deviceManager: DeviceManager,
+        historyStore: DeviceHistoryStore
+    ) {
         self.device = device
         self.adbService = adbService
         self.screenshotService = screenshotService
         self.deviceManager = deviceManager
+        self.historyStore = historyStore
         _viewModel = StateObject(wrappedValue: DeviceDetailViewModel(
             device: device,
             adbService: adbService,
             screenshotService: screenshotService,
-            deviceManager: deviceManager
+            deviceManager: deviceManager,
+            historyStore: historyStore
         ))
     }
 
@@ -258,6 +267,7 @@ struct DeviceStateMessageView: View {
             deviceIdentifier: DeviceIdentifier(adbService: adbService),
             historyStore: DeviceHistoryStore(),
             settingsStore: settingsStore
-        )
+        ),
+        historyStore: DeviceHistoryStore()
     )
 }

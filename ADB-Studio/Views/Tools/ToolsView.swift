@@ -452,7 +452,8 @@ struct PowerActionButton: View {
             deviceIdentifier: DeviceIdentifier(adbService: adbService),
             historyStore: DeviceHistoryStore(),
             settingsStore: settingsStore
-        )
+        ),
+        historyStore: DeviceHistoryStore()
     ))
     .padding()
 }
