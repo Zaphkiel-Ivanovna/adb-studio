@@ -134,21 +134,20 @@ final class ShellExecutor: ShellExecuting {
     // MARK: - Private Helpers
 
     /// Returns true if `process` (already launched) had to be terminated for exceeding `timeout`.
+    /// Only the wait task installs a `terminationHandler`; the timeout task signals and exits
+    /// immediately, so the handler is never overwritten.
     private static func raceProcessAgainstTimeout(_ process: Process, timeout: TimeInterval) async -> Bool {
-        await withTaskGroup(of: TimeoutOutcome.self, returning: Bool.self) { group in
+        let box = ProcessBox(process)
+        return await withTaskGroup(of: TimeoutOutcome.self, returning: Bool.self) { group in
             group.addTask {
-                await process.waitUntilExitAsync()
+                await box.process.waitUntilExitAsync()
                 return .finished
             }
             group.addTask {
                 try? await Task.sleep(for: .seconds(timeout))
-                if Task.isCancelled { return .finished }
-                if process.isRunning {
-                    process.terminate()
-                    await process.waitUntilExitAsync()
-                    return .timedOut
-                }
-                return .finished
+                if Task.isCancelled || !box.process.isRunning { return .finished }
+                box.process.terminate()
+                return .timedOut
             }
             let first = await group.next() ?? .finished
             group.cancelAll()
@@ -194,32 +193,68 @@ private final class DataAccumulator: @unchecked Sendable {
     }
 }
 
-/// Resumes a `CheckedContinuation` exactly once across concurrent callers.
+/// `@unchecked Sendable` wrapper for sharing a non-`Sendable` `Process` between
+/// the wait and timeout tasks of `raceProcessAgainstTimeout`.
+private final class ProcessBox: @unchecked Sendable {
+    let process: Process
+    init(_ process: Process) { self.process = process }
+}
+
+/// Resumes a `CheckedContinuation` exactly once; the resume signal may arrive
+/// before the continuation has been registered (e.g. on early cancellation).
 private final class ContinuationLatch: @unchecked Sendable {
     private let lock = NSLock()
-    private var resumed = false
-    private let continuation: CheckedContinuation<Void, Never>
+    private var state: State = .pending
 
-    init(_ continuation: CheckedContinuation<Void, Never>) {
-        self.continuation = continuation
+    private enum State {
+        case pending
+        case waiting(CheckedContinuation<Void, Never>)
+        case resumed
+    }
+
+    func setContinuation(_ continuation: CheckedContinuation<Void, Never>) {
+        lock.lock()
+        switch state {
+        case .pending:
+            state = .waiting(continuation)
+            lock.unlock()
+        case .resumed:
+            lock.unlock()
+            continuation.resume()
+        case .waiting:
+            lock.unlock()
+            preconditionFailure("Continuation already set")
+        }
     }
 
     func resume() {
         lock.lock()
-        defer { lock.unlock() }
-        guard !resumed else { return }
-        resumed = true
-        continuation.resume()
+        switch state {
+        case .pending:
+            state = .resumed
+            lock.unlock()
+        case .waiting(let continuation):
+            state = .resumed
+            lock.unlock()
+            continuation.resume()
+        case .resumed:
+            lock.unlock()
+        }
     }
 }
 
 private extension Process {
-    /// Awaits exit, handling the race where the process ends before the handler is installed.
+    /// Awaits exit via `terminationHandler`, observing task cancellation.
     func waitUntilExitAsync() async {
-        await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
-            let latch = ContinuationLatch(continuation)
-            self.terminationHandler = { _ in latch.resume() }
-            if !self.isRunning { latch.resume() }
+        let latch = ContinuationLatch()
+        await withTaskCancellationHandler {
+            await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
+                latch.setContinuation(continuation)
+                self.terminationHandler = { _ in latch.resume() }
+                if !self.isRunning { latch.resume() }
+            }
+        } onCancel: {
+            latch.resume()
         }
     }
 }
