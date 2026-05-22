@@ -5,6 +5,28 @@ struct ServerLaunchResult {
     let stdout: Pipe
     let stderr: Pipe
     let remoteJarPath: String
+    let terminationFlag: ProcessTerminationFlag
+}
+
+/// Tracks whether a `Process` has fired its `terminationHandler`. Callers consult
+/// this before invoking `terminate()` because `Foundation.Process.terminate()` is
+/// documented to raise `NSInvalidArgumentException` on an already-terminated task,
+/// which would crash the app — `isRunning` alone is a non-atomic check.
+final class ProcessTerminationFlag: @unchecked Sendable {
+    private let lock = NSLock()
+    private var _terminated = false
+
+    func mark() {
+        lock.lock()
+        _terminated = true
+        lock.unlock()
+    }
+
+    var isTerminated: Bool {
+        lock.lock()
+        defer { lock.unlock() }
+        return _terminated
+    }
 }
 
 struct ServerLauncher {
@@ -61,6 +83,9 @@ struct ServerLauncher {
             }
         }
 
+        let terminationFlag = ProcessTerminationFlag()
+        handle.process.terminationHandler = { _ in terminationFlag.mark() }
+
         do {
             try handle.process.run()
         } catch {
@@ -73,7 +98,8 @@ struct ServerLauncher {
             process: handle.process,
             stdout: handle.stdout,
             stderr: handle.stderr,
-            remoteJarPath: remotePath
+            remoteJarPath: remotePath,
+            terminationFlag: terminationFlag
         )
     }
 
@@ -81,7 +107,7 @@ struct ServerLauncher {
         result.stdout.fileHandleForReading.readabilityHandler = nil
         result.stderr.fileHandleForReading.readabilityHandler = nil
 
-        if result.process.isRunning {
+        if !result.terminationFlag.isTerminated && result.process.isRunning {
             result.process.terminate()
         }
 

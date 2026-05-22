@@ -135,7 +135,9 @@ final class ShellExecutor: ShellExecuting {
 
     /// Returns true if `process` (already launched) had to be terminated for exceeding `timeout`.
     /// Only the wait task installs a `terminationHandler`; the timeout task signals and exits
-    /// immediately, so the handler is never overwritten.
+    /// immediately, so the handler is never overwritten. Guarantees the process has exited
+    /// before returning — including when the enclosing task is cancelled — so callers can
+    /// safely read `terminationStatus` without risking an NSInvalidArgumentException.
     private static func raceProcessAgainstTimeout(_ process: Process, timeout: TimeInterval) async -> Bool {
         let box = ProcessBox(process)
         return await withTaskGroup(of: TimeoutOutcome.self, returning: Bool.self) { group in
@@ -245,6 +247,10 @@ private final class ContinuationLatch: @unchecked Sendable {
 
 private extension Process {
     /// Awaits exit via `terminationHandler`, observing task cancellation.
+    /// On cancellation, terminates the process so the continuation is only resumed once the OS
+    /// has reaped the task (via `terminationHandler`). Resuming the latch directly from
+    /// `onCancel` would let callers read `terminationStatus` on a still-running task, which
+    /// raises `NSInvalidArgumentException` and aborts the process.
     func waitUntilExitAsync() async {
         let latch = ContinuationLatch()
         await withTaskCancellationHandler {
@@ -254,7 +260,7 @@ private extension Process {
                 if !self.isRunning { latch.resume() }
             }
         } onCancel: {
-            latch.resume()
+            if self.isRunning { self.terminate() }
         }
     }
 }
