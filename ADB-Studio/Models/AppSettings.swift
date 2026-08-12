@@ -16,6 +16,14 @@ struct AppSettings: Codable, Equatable {
     var mirroringShowTouches: Bool = false
     var mirroringClipboardAutosync: Bool = false
     var mirroringRightClickOpensMenu: Bool = false
+    var crashReportingConsent: CrashReportingConsent = .unknown
+    var crashReportingInstallationID: String?
+
+    enum CrashReportingConsent: String, Codable, CaseIterable {
+        case unknown
+        case granted
+        case denied
+    }
 
     enum ScreenshotLocation: String, Codable, CaseIterable {
         case downloads = "downloads"
@@ -58,5 +66,7 @@ struct AppSettings: Codable, Equatable {
         self.mirroringShowTouches = try c.decodeIfPresent(Bool.self, forKey: .mirroringShowTouches) ?? defaults.mirroringShowTouches
         self.mirroringClipboardAutosync = try c.decodeIfPresent(Bool.self, forKey: .mirroringClipboardAutosync) ?? defaults.mirroringClipboardAutosync
         self.mirroringRightClickOpensMenu = try c.decodeIfPresent(Bool.self, forKey: .mirroringRightClickOpensMenu) ?? defaults.mirroringRightClickOpensMenu
+        self.crashReportingConsent = try c.decodeIfPresent(CrashReportingConsent.self, forKey: .crashReportingConsent) ?? defaults.crashReportingConsent
+        self.crashReportingInstallationID = try c.decodeIfPresent(String.self, forKey: .crashReportingInstallationID)
     }
 }

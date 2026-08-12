@@ -14,6 +14,7 @@ final class DeviceManager: ObservableObject {
     private let adbService: ADBService
     private let deviceIdentifier: DeviceIdentifier
     private let historyStore: DeviceHistoryStore
+    private let crashReporting: CrashReportingService
     private var refreshInterval: TimeInterval
 
     private var refreshTask: Task<Void, Never>?
@@ -23,11 +24,13 @@ final class DeviceManager: ObservableObject {
         adbService: ADBService,
         deviceIdentifier: DeviceIdentifier,
         historyStore: DeviceHistoryStore,
-        settingsStore: SettingsStore
+        settingsStore: SettingsStore,
+        crashReporting: CrashReportingService
     ) {
         self.adbService = adbService
         self.deviceIdentifier = deviceIdentifier
         self.historyStore = historyStore
+        self.crashReporting = crashReporting
         self.refreshInterval = settingsStore.settings.refreshInterval
     }
 
@@ -96,9 +99,15 @@ final class DeviceManager: ObservableObject {
         } catch let error as ADBError {
             lastError = error
             isServerRunning = false
+            crashReporting.addBreadcrumb(
+                category: "device",
+                message: "Device refresh failed: \(error.localizedDescription)",
+                level: .warning
+            )
         } catch {
             lastError = .commandFailed("refresh", -1)
             isServerRunning = false
+            crashReporting.addBreadcrumb(category: "device", message: "Device refresh failed", level: .warning)
         }
 
         isRefreshing = false
@@ -164,9 +173,11 @@ final class DeviceManager: ObservableObject {
         } catch let error as ADBError {
             isServerRunning = false
             lastError = error
+            crashReporting.capture(error)
         } catch {
             isServerRunning = false
             lastError = .serverStartFailed(error.localizedDescription)
+            crashReporting.capture(error)
         }
         isStartingServer = false
     }

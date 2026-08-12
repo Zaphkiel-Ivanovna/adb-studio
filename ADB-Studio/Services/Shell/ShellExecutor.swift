@@ -23,6 +23,12 @@ protocol ShellExecuting {
 
 final class ShellExecutor: ShellExecuting {
 
+    private let crashReporting: CrashReportingService?
+
+    init(crashReporting: CrashReportingService? = nil) {
+        self.crashReporting = crashReporting
+    }
+
     // MARK: - Public API
 
     func execute(_ command: String, arguments: [String] = [], timeout: TimeInterval = 30.0) async throws -> ShellResult {
@@ -42,6 +48,11 @@ final class ShellExecutor: ShellExecuting {
 
         if timedOut {
             print("⏱️ TIMEOUT after \(timeout)s: \(command) \(arguments.joined(separator: " "))")
+            crashReporting?.addBreadcrumb(
+                category: "shell",
+                message: "Command timed out after \(Int(timeout))s",
+                level: .warning
+            )
             throw ADBError.timeout
         }
 
@@ -89,6 +100,11 @@ final class ShellExecutor: ShellExecuting {
 
         if timedOut {
             print("⏱️ RAW TIMEOUT after \(timeout)s: \(command) \(arguments.joined(separator: " "))")
+            crashReporting?.addBreadcrumb(
+                category: "shell",
+                message: "Raw command timed out after \(Int(timeout))s",
+                level: .warning
+            )
             throw ADBError.timeout
         }
 

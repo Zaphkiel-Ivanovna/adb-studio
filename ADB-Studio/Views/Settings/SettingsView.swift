@@ -180,6 +180,21 @@ struct GeneralSettingsTab: View {
                     .frame(width: 120)
                 }
             }
+
+            SettingsSection(title: "PRIVACY") {
+                SettingsToggle(
+                    title: "Send anonymous crash reports",
+                    description: "Helps catch crashes and errors. Stack traces are scrubbed of device "
+                        + "serials, IP addresses, file paths, clipboard contents and pairing codes "
+                        + "before sending. No personal data leaves your Mac.",
+                    isOn: Binding(
+                        get: { settingsStore.settings.crashReportingConsent != .denied },
+                        set: { newValue in
+                            settingsStore.update { $0.crashReportingConsent = newValue ? .granted : .denied }
+                        }
+                    )
+                )
+            }
         }
         .padding(24)
     }

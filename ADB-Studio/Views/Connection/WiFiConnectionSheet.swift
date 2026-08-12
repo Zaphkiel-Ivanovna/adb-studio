@@ -686,6 +686,7 @@ struct PairingSheet: View {
         adbService: adbService,
         deviceIdentifier: DeviceIdentifier(adbService: adbService),
         historyStore: historyStore,
-        settingsStore: settingsStore
+        settingsStore: settingsStore,
+        crashReporting: CrashReportingServiceImpl(installationID: "preview")
     ))
 }

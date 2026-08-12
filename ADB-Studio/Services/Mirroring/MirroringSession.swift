@@ -44,6 +44,7 @@ final class MirroringSession: ObservableObject {
     private let scid: Int32
     private let transport: SessionTransport
     private let turnOffDisplayOnStart: Bool
+    private let crashReporting: CrashReportingService
 
     private var launchResult: ServerLaunchResult?
     private var decoder: H264Decoder?
@@ -62,6 +63,7 @@ final class MirroringSession: ObservableObject {
         adbService: ADBService,
         parameters: ServerParameters = ServerParameters(),
         turnOffDisplayOnStart: Bool = false,
+        crashReporting: CrashReportingService,
         onFinished: @escaping (MirroringSession) -> Void = { _ in }
     ) {
         self.adbId = adbId
@@ -69,6 +71,7 @@ final class MirroringSession: ObservableObject {
         self.adbService = adbService
         self.parameters = parameters
         self.turnOffDisplayOnStart = turnOffDisplayOnStart
+        self.crashReporting = crashReporting
         self.renderer = SampleBufferRenderer()
         self.launcher = ServerLauncher(adbService: adbService)
         self.onFinished = onFinished
@@ -96,10 +99,12 @@ final class MirroringSession: ObservableObject {
             self.launchResult = launch
         } catch let error as MirroringError {
             state = .error(error)
+            crashReporting.capture(error)
             await finish()
             return
         } catch {
             state = .error(.serverLaunchFailed(error.localizedDescription))
+            crashReporting.capture(error)
             await finish()
             return
         }

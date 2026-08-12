@@ -40,9 +40,46 @@ jobs:
             MARKETING_VERSION="${{ steps.version.outputs.VERSION }}" \
             CURRENT_PROJECT_VERSION="${{ github.run_number }}"
 
+      # Custom INFOPLIST_KEY_* settings are NOT written to the generated Info.plist by Xcode,
+      # so the DSN is injected into the built app's Info.plist here, before signing.
+      - name: 🔧 Inject Sentry config
+        env:
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+          SENTRY_ALLOWED_HOST: ${{ secrets.SENTRY_ALLOWED_HOST }}
+        run: |
+          if [ -z "${SENTRY_DSN}" ]; then
+            echo "SENTRY_DSN not set — telemetry will stay inert in this build."
+            exit 0
+          fi
+          PLIST="build/Build/Products/Release/ADB-Studio.app/Contents/Info.plist"
+          /usr/libexec/PlistBuddy -c "Add :SENTRY_DSN string ${SENTRY_DSN}" "$PLIST" \
+            || /usr/libexec/PlistBuddy -c "Set :SENTRY_DSN ${SENTRY_DSN}" "$PLIST"
+          /usr/libexec/PlistBuddy -c "Add :SENTRY_ALLOWED_HOST string ${SENTRY_ALLOWED_HOST}" "$PLIST" \
+            || /usr/libexec/PlistBuddy -c "Set :SENTRY_ALLOWED_HOST ${SENTRY_ALLOWED_HOST}" "$PLIST"
+          echo "Injected Sentry config into Info.plist."
+
       - name: 🔏 Ad-hoc Sign
         run: |
           codesign --force --deep --sign - "build/Build/Products/Release/ADB-Studio.app"
+
+      - name: 📡 Upload dSYMs to Sentry
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
+          SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
+          SENTRY_URL: ${{ secrets.SENTRY_URL }}
+          VERSION: ${{ steps.version.outputs.VERSION }}
+        run: |
+          if [ -z "${SENTRY_AUTH_TOKEN}" ]; then
+            echo "SENTRY_AUTH_TOKEN not set — skipping dSYM upload."
+            exit 0
+          fi
+          curl -sL https://sentry.io/get-cli/ | bash
+          RELEASE="dev.zaphkiel.adbstudio@${VERSION}"
+          sentry-cli debug-files upload "build/Build/Products/Release/ADB-Studio.app.dSYM"
+          sentry-cli releases new "${RELEASE}"
+          sentry-cli releases set-commits "${RELEASE}" --auto || true
+          sentry-cli releases finalize "${RELEASE}"
 
       - name: 💿 Create DMG
         run: |

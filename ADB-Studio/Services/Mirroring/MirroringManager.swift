@@ -9,14 +9,21 @@ final class MirroringManager: ObservableObject {
     private let adbService: ADBService
     private let deviceManager: DeviceManager
     private let settingsStore: SettingsStore
+    private let crashReporting: CrashReportingService
 
     private var availabilityTask: Task<Void, Never>?
     private var deviceWatcher: AnyCancellable?
 
-    init(adbService: ADBService, deviceManager: DeviceManager, settingsStore: SettingsStore) {
+    init(
+        adbService: ADBService,
+        deviceManager: DeviceManager,
+        settingsStore: SettingsStore,
+        crashReporting: CrashReportingService
+    ) {
         self.adbService = adbService
         self.deviceManager = deviceManager
         self.settingsStore = settingsStore
+        self.crashReporting = crashReporting
 
         availabilityTask = Task { [weak self] in
             while !Task.isCancelled {
@@ -67,6 +74,7 @@ final class MirroringManager: ObservableObject {
             adbService: adbService,
             parameters: resolvedParams,
             turnOffDisplayOnStart: appSettings.mirroringTurnOffDisplayOnStart,
+            crashReporting: crashReporting,
             onFinished: { [weak self] finished in
                 self?.remove(finished)
             }

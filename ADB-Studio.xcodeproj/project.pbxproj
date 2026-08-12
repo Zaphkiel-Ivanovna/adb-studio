@@ -7,8 +7,13 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0C635FE852A23966F9CDE9B2 /* Sentry in Frameworks */ = {isa = PBXBuildFile; productRef = 7AB89E9CE1B49E1C1F9A3811 /* Sentry */; };
+		282CD4FAD09D0100830C2E92 /* PIIScrubber.swift in Sources */ = {isa = PBXBuildFile; fileRef = 040D56ADB15D08F77A053FB8 /* PIIScrubber.swift */; };
+		4E3BBCAEA3C7598F269414D9 /* CrashReportingConsentSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B273CDB986171CD75D3D6D1 /* CrashReportingConsentSheet.swift */; };
+		7C5FEB83E89AAF43BD6B5D61 /* CrashReportingServiceImpl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FC1AFB447AEA4C2EF03FE04 /* CrashReportingServiceImpl.swift */; };
 		7C92DA4E342DC74D3E9C4A56 /* InstalledAppRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21ED6789435F967A7C9B60DE /* InstalledAppRow.swift */; };
 		B4A0E97B24E46EEBF0EF6620 /* InstalledAppsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1CA7078B945077C30D30D25 /* InstalledAppsViewModel.swift */; };
+		B974FD9525983DC23C7B1D85 /* CrashReportingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 342AC021265E15C26E15CFE0 /* CrashReportingService.swift */; };
 		D33D7E38DA7214CCE1AF2FE7 /* InstalledApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55A8D4C81788B3278F7D5F24 /* InstalledApp.swift */; };
 		E00000010000000000000001 /* ADB_StudioApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = E00000020000000000000001 /* ADB_StudioApp.swift */; };
 		E00000010000000000000002 /* DependencyContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = E00000020000000000000002 /* DependencyContainer.swift */; };
@@ -49,7 +54,6 @@
 		E00000010000000000000039 /* MirroringManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E00000020000000000000039 /* MirroringManager.swift */; };
 		E00000010000000000000040 /* MirroringSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = E00000020000000000000040 /* MirroringSession.swift */; };
 		E00000010000000000000041 /* MirroringError.swift in Sources */ = {isa = PBXBuildFile; fileRef = E00000020000000000000041 /* MirroringError.swift */; };
-		E00000010000000000000059 /* DeviceMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = E00000020000000000000059 /* DeviceMessage.swift */; };
 		E00000010000000000000042 /* ServerLauncher.swift in Sources */ = {isa = PBXBuildFile; fileRef = E00000020000000000000042 /* ServerLauncher.swift */; };
 		E00000010000000000000043 /* ServerParameters.swift in Sources */ = {isa = PBXBuildFile; fileRef = E00000020000000000000043 /* ServerParameters.swift */; };
 		E00000010000000000000044 /* SessionTransport.swift in Sources */ = {isa = PBXBuildFile; fileRef = E00000020000000000000044 /* SessionTransport.swift */; };
@@ -65,6 +69,9 @@
 		E00000010000000000000054 /* MirroringWindowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E00000020000000000000054 /* MirroringWindowView.swift */; };
 		E00000010000000000000055 /* MirroringRenderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E00000020000000000000055 /* MirroringRenderView.swift */; };
 		E00000010000000000000056 /* MirroringStatusBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = E00000020000000000000056 /* MirroringStatusBar.swift */; };
+		E00000010000000000000057 /* scrcpy-server in Resources */ = {isa = PBXBuildFile; fileRef = E00000020000000000000057 /* scrcpy-server */; };
+		E00000010000000000000058 /* scrcpy-license in Resources */ = {isa = PBXBuildFile; fileRef = E00000020000000000000058 /* scrcpy-license */; };
+		E00000010000000000000059 /* DeviceMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = E00000020000000000000059 /* DeviceMessage.swift */; };
 		E00000010000000000000060 /* MirroringToolbar.swift in Sources */ = {isa = PBXBuildFile; fileRef = E00000020000000000000060 /* MirroringToolbar.swift */; };
 		E00000010000000000000061 /* MirroringShortcutsOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = E00000020000000000000061 /* MirroringShortcutsOverlay.swift */; };
 		E00000010000000000000062 /* WindowAccessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = E00000020000000000000062 /* WindowAccessor.swift */; };
@@ -74,13 +81,15 @@
 		E00000010000000000000066 /* PortForwardSettingsTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = E00000020000000000000066 /* PortForwardSettingsTab.swift */; };
 		E00000010000000000000067 /* PortForwardPresetRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E00000020000000000000067 /* PortForwardPresetRowView.swift */; };
 		E00000010000000000000068 /* PortForwardSettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E00000020000000000000068 /* PortForwardSettingsViewModel.swift */; };
-		E00000010000000000000057 /* scrcpy-server in Resources */ = {isa = PBXBuildFile; fileRef = E00000020000000000000057 /* scrcpy-server */; };
-		E00000010000000000000058 /* scrcpy-license in Resources */ = {isa = PBXBuildFile; fileRef = E00000020000000000000058 /* scrcpy-license */; };
 		FCC1383DCF24102D2B126FD5 /* InstalledAppsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CED2523D7F78C0B0CCE9EF28 /* InstalledAppsView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		040D56ADB15D08F77A053FB8 /* PIIScrubber.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PIIScrubber.swift; sourceTree = "<group>"; };
+		0B273CDB986171CD75D3D6D1 /* CrashReportingConsentSheet.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CrashReportingConsentSheet.swift; sourceTree = "<group>"; };
+		0FC1AFB447AEA4C2EF03FE04 /* CrashReportingServiceImpl.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CrashReportingServiceImpl.swift; sourceTree = "<group>"; };
 		21ED6789435F967A7C9B60DE /* InstalledAppRow.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = InstalledAppRow.swift; sourceTree = "<group>"; };
+		342AC021265E15C26E15CFE0 /* CrashReportingService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CrashReportingService.swift; sourceTree = "<group>"; };
 		55A8D4C81788B3278F7D5F24 /* InstalledApp.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = InstalledApp.swift; sourceTree = "<group>"; };
 		CED2523D7F78C0B0CCE9EF28 /* InstalledAppsView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = InstalledAppsView.swift; sourceTree = "<group>"; };
 		D1CA7078B945077C30D30D25 /* InstalledAppsViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = InstalledAppsViewModel.swift; sourceTree = "<group>"; };
@@ -124,7 +133,6 @@
 		E00000020000000000000039 /* MirroringManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MirroringManager.swift; sourceTree = "<group>"; };
 		E00000020000000000000040 /* MirroringSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MirroringSession.swift; sourceTree = "<group>"; };
 		E00000020000000000000041 /* MirroringError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MirroringError.swift; sourceTree = "<group>"; };
-		E00000020000000000000059 /* DeviceMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceMessage.swift; sourceTree = "<group>"; };
 		E00000020000000000000042 /* ServerLauncher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerLauncher.swift; sourceTree = "<group>"; };
 		E00000020000000000000043 /* ServerParameters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerParameters.swift; sourceTree = "<group>"; };
 		E00000020000000000000044 /* SessionTransport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionTransport.swift; sourceTree = "<group>"; };
@@ -140,6 +148,9 @@
 		E00000020000000000000054 /* MirroringWindowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MirroringWindowView.swift; sourceTree = "<group>"; };
 		E00000020000000000000055 /* MirroringRenderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MirroringRenderView.swift; sourceTree = "<group>"; };
 		E00000020000000000000056 /* MirroringStatusBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MirroringStatusBar.swift; sourceTree = "<group>"; };
+		E00000020000000000000057 /* scrcpy-server */ = {isa = PBXFileReference; lastKnownFileType = file; path = "scrcpy-server"; sourceTree = "<group>"; };
+		E00000020000000000000058 /* scrcpy-license */ = {isa = PBXFileReference; lastKnownFileType = folder; path = "scrcpy-license"; sourceTree = "<group>"; };
+		E00000020000000000000059 /* DeviceMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceMessage.swift; sourceTree = "<group>"; };
 		E00000020000000000000060 /* MirroringToolbar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MirroringToolbar.swift; sourceTree = "<group>"; };
 		E00000020000000000000061 /* MirroringShortcutsOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MirroringShortcutsOverlay.swift; sourceTree = "<group>"; };
 		E00000020000000000000062 /* WindowAccessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WindowAccessor.swift; sourceTree = "<group>"; };
@@ -149,8 +160,6 @@
 		E00000020000000000000066 /* PortForwardSettingsTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PortForwardSettingsTab.swift; sourceTree = "<group>"; };
 		E00000020000000000000067 /* PortForwardPresetRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PortForwardPresetRowView.swift; sourceTree = "<group>"; };
 		E00000020000000000000068 /* PortForwardSettingsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PortForwardSettingsViewModel.swift; sourceTree = "<group>"; };
-		E00000020000000000000057 /* scrcpy-server */ = {isa = PBXFileReference; lastKnownFileType = file; path = "scrcpy-server"; sourceTree = "<group>"; };
-		E00000020000000000000058 /* scrcpy-license */ = {isa = PBXFileReference; lastKnownFileType = folder; path = "scrcpy-license"; sourceTree = "<group>"; };
 		E00000030000000000000001 /* ADB-Studio.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "ADB-Studio.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -159,6 +168,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0C635FE852A23966F9CDE9B2 /* Sentry in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -173,6 +183,26 @@
 			);
 			name = InstalledApps;
 			path = InstalledApps;
+			sourceTree = "<group>";
+		};
+		439FC959FDF7C9C233F95339 /* CrashReporting */ = {
+			isa = PBXGroup;
+			children = (
+				040D56ADB15D08F77A053FB8 /* PIIScrubber.swift */,
+				342AC021265E15C26E15CFE0 /* CrashReportingService.swift */,
+				0FC1AFB447AEA4C2EF03FE04 /* CrashReportingServiceImpl.swift */,
+			);
+			name = CrashReporting;
+			path = CrashReporting;
+			sourceTree = "<group>";
+		};
+		7E763CBCEEB5D37245025210 /* Onboarding */ = {
+			isa = PBXGroup;
+			children = (
+				0B273CDB986171CD75D3D6D1 /* CrashReportingConsentSheet.swift */,
+			);
+			name = Onboarding;
+			path = Onboarding;
 			sourceTree = "<group>";
 		};
 		E00000050000000000000001 = {
@@ -243,16 +273,9 @@
 				E00000050000000000000032 /* PortForward */,
 				E00000050000000000000013 /* Shell */,
 				E00000050000000000000022 /* Updates */,
+				439FC959FDF7C9C233F95339 /* CrashReporting */,
 			);
 			path = Services;
-			sourceTree = "<group>";
-		};
-		E00000050000000000000032 /* PortForward */ = {
-			isa = PBXGroup;
-			children = (
-				E00000020000000000000064 /* PortForwardAutoApplyManager.swift */,
-			);
-			path = PortForward;
 			sourceTree = "<group>";
 		};
 		E00000050000000000000007 /* ViewModels */ = {
@@ -278,6 +301,7 @@
 				E00000050000000000000023 /* APKInstaller */,
 				E00000050000000000000030 /* Mirroring */,
 				2F9061625562A1D737FE9880 /* InstalledApps */,
+				7E763CBCEEB5D37245025210 /* Onboarding */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -500,6 +524,14 @@
 			path = Resources;
 			sourceTree = "<group>";
 		};
+		E00000050000000000000032 /* PortForward */ = {
+			isa = PBXGroup;
+			children = (
+				E00000020000000000000064 /* PortForwardAutoApplyManager.swift */,
+			);
+			path = PortForward;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -516,6 +548,9 @@
 			dependencies = (
 			);
 			name = "ADB-Studio";
+			packageProductDependencies = (
+				7AB89E9CE1B49E1C1F9A3811 /* Sentry */,
+			);
 			productName = "ADB-Studio";
 			productReference = E00000030000000000000001 /* ADB-Studio.app */;
 			productType = "com.apple.product-type.application";
@@ -544,6 +579,9 @@
 				Base,
 			);
 			mainGroup = E00000050000000000000001;
+			packageReferences = (
+				F4EA00C295ED9210287729A1 /* XCRemoteSwiftPackageReference "sentry-cocoa" */,
+			);
 			productRefGroup = E00000050000000000000003 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -638,6 +676,10 @@
 				B4A0E97B24E46EEBF0EF6620 /* InstalledAppsViewModel.swift in Sources */,
 				FCC1383DCF24102D2B126FD5 /* InstalledAppsView.swift in Sources */,
 				7C92DA4E342DC74D3E9C4A56 /* InstalledAppRow.swift in Sources */,
+				282CD4FAD09D0100830C2E92 /* PIIScrubber.swift in Sources */,
+				4E3BBCAEA3C7598F269414D9 /* CrashReportingConsentSheet.swift in Sources */,
+				B974FD9525983DC23C7B1D85 /* CrashReportingService.swift in Sources */,
+				7C5FEB83E89AAF43BD6B5D61 /* CrashReportingServiceImpl.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -838,6 +880,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		F4EA00C295ED9210287729A1 /* XCRemoteSwiftPackageReference "sentry-cocoa" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/getsentry/sentry-cocoa";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 9.16.1;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		7AB89E9CE1B49E1C1F9A3811 /* Sentry */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = F4EA00C295ED9210287729A1 /* XCRemoteSwiftPackageReference "sentry-cocoa" */;
+			productName = Sentry;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = E000000A0000000000000001 /* Project object */;
 }

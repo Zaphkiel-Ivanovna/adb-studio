@@ -7,6 +7,7 @@ struct ContentView: View {
     @State private var selectedDeviceId: String?
     @State private var showWiFiConnectionSheet = false
     @State private var showUpdateAlert = false
+    @State private var showCrashReportingConsent = false
 
     var body: some View {
         NavigationSplitView {
@@ -83,6 +84,14 @@ struct ContentView: View {
                 discoveryService: container.discoveryService,
                 adbService: container.adbService
             )
+        }
+        .sheet(isPresented: $showCrashReportingConsent) {
+            CrashReportingConsentSheet(settingsStore: container.settingsStore)
+        }
+        .onAppear {
+            if container.settingsStore.settings.crashReportingConsent == .unknown {
+                showCrashReportingConsent = true
+            }
         }
         .alert("ADB Not Found", isPresented: .constant(deviceManager.hasCheckedADB && !deviceManager.isADBAvailable)) {
             Button("OK") { }

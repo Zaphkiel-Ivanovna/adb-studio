@@ -71,6 +71,7 @@ struct EmptyDeviceListView: View {
             adbService: adbService,
             deviceIdentifier: DeviceIdentifier(adbService: adbService),
             historyStore: DeviceHistoryStore(),
-            settingsStore: settingsStore
+            settingsStore: settingsStore,
+            crashReporting: CrashReportingServiceImpl(installationID: "preview")
         ))
 }

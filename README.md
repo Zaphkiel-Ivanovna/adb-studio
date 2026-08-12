@@ -261,6 +261,18 @@ If you find ADB Studio useful, consider supporting its development:
   <img src="https://ko-fi.com/img/githubbutton_sm.svg" alt="Support on Ko-fi">
 </a>
 
+## Privacy & Crash Reporting
+
+ADB Studio sends **anonymous** crash and error reports to a self-hosted [Sentry](https://sentry.io) instance to help fix issues like unexpected crashes. It is **on by default** and can be turned off at any time:
+
+- A notice is shown on first launch, and a toggle lives in **Settings › General › Privacy**.
+
+**What is sent:** scrubbed crash stack traces, error categories, performance/profiling data, app & macOS version, and a random installation ID generated on your device.
+
+**What is never sent:** device serial numbers, IP addresses, file paths, clipboard contents, pairing codes, ADB command arguments, or device names — these are stripped on-device before anything is transmitted.
+
+You can disable reporting entirely from Settings; once disabled, the SDK is shut down and no data is sent.
+
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
@@ -269,6 +281,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - [Android Debug Bridge (ADB)](https://developer.android.com/tools/adb) by Google
 - [scrcpy](https://github.com/Genymobile/scrcpy) by Romain Vimont — screen mirroring server (Apache 2.0)
+- [sentry-cocoa](https://github.com/getsentry/sentry-cocoa) by Sentry — crash & error reporting SDK (MIT)
 - Built with [SwiftUI](https://developer.apple.com/swiftui/)
 
 ---

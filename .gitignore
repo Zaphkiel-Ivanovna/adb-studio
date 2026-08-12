@@ -69,3 +69,10 @@ playground.xcworkspace
 *.dmg
 *.zip
 *.pkg
+
+# Track the SwiftPM resolution pin so CI and contributors resolve identical versions.
+# Parent dirs must be re-included before the file (overrides *.xcworkspace and Package.resolved above).
+!ADB-Studio.xcodeproj/project.xcworkspace/
+!ADB-Studio.xcodeproj/project.xcworkspace/xcshareddata/
+!ADB-Studio.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/
+!ADB-Studio.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
