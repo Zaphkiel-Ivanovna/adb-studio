@@ -1,0 +1,17 @@
+{
+  "mcpServers": {
+    "context7": {
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp"],
+      "description": "Live documentation lookup for SwiftUI, AppKit, Foundation, AVFoundation, Network, Combine. Use to fetch up-to-date Apple framework docs without leaving the editor."
+    },
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}"
+      },
+      "description": "GitHub PRs, issues, releases, and Actions for the Zaphkiel-Ivanovna/adb-studio repo. Requires GITHUB_TOKEN env var (or run gh auth status to share gh CLI auth)."
+    }
+  }
+}

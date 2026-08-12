@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "allow": [
+      "Bash(xcodebuild:*)",
+      "Bash(adb:*)",
+      "Bash(swiftlint:*)",
+      "Bash(swift-format:*)",
+      "Bash(swift:*)",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git show:*)",
+      "Bash(git branch:*)",
+      "Bash(git rev-parse:*)",
+      "Bash(git fetch:*)",
+      "Bash(git pull:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git tag:*)",
+      "Bash(git checkout:*)",
+      "Bash(git stash:*)",
+      "Bash(gh pr:*)",
+      "Bash(gh issue:*)",
+      "Bash(gh release:*)",
+      "Bash(gh run:*)",
+      "Bash(gh workflow:*)",
+      "Bash(open:*)",
+      "Bash(ls:*)",
+      "Bash(find:*)",
+      "Bash(rg:*)",
+      "Bash(grep:*)",
+      "Bash(wc:*)",
+      "Bash(file:*)",
+      "Bash(xxd:*)",
+      "Bash(plutil:*)",
+      "Bash(codesign --display:*)",
+      "Bash(codesign --verify:*)",
+      "Bash(hdiutil:*)",
+      "Bash(mkdir:*)",
+      "Bash(scripts/create-dmg.sh:*)",
+      "Bash(./scripts/*)",
+      "WebSearch",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:api.github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:android.googlesource.com)",
+      "WebFetch(domain:developer.apple.com)"
+    ],
+    "deny": [
+      "Bash(git push --force:*)",
+      "Bash(git push -f:*)",
+      "Bash(git reset --hard:*)",
+      "Bash(git clean -fd:*)",
+      "Bash(rm -rf /:*)",
+      "Bash(sudo:*)"
+    ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "for f in $CLAUDE_FILE_PATHS; do case \"$f\" in *.swift) command -v swift-format >/dev/null 2>&1 && swift-format -i \"$f\"; command -v swiftlint >/dev/null 2>&1 && swiftlint lint --quiet --path \"$f\" 2>&1 | grep -v '^Linting' | head -50 ;; esac; done; exit 0"
+          }
+        ]
+      }
+    ]
+  }
+}
