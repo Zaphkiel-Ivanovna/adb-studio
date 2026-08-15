@@ -64,11 +64,12 @@ enum ADBError: LocalizedError {
     }
 
     private static let deviceLossMarkers = [
-        "not found",
-        "no devices",
+        "' not found",
+        "no devices/emulators found",
         "device offline",
         "device unauthorized",
         "protocol fault",
-        "connection closed"
+        "connection closed",
+        "cannot connect to daemon"
     ]
 }
