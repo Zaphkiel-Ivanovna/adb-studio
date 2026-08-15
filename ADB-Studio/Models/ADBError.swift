@@ -51,4 +51,25 @@ enum ADBError: LocalizedError {
             return "Pairing succeeded but \(host) did not advertise its debugging port in time. Open Wireless debugging on the device and try connecting again."
         }
     }
+
+    var isDeviceUnreachable: Bool {
+        switch self {
+        case .adbNotFound, .deviceNotFound, .offline, .unauthorized, .timeout:
+            return true
+        case .installFailed(let message), .uninstallFailed(let message), .appActionFailed(_, let message):
+            return Self.deviceLossMarkers.contains { message.localizedCaseInsensitiveContains($0) }
+        default:
+            return false
+        }
+    }
+
+    private static let deviceLossMarkers = [
+        "' not found",
+        "no devices/emulators found",
+        "device offline",
+        "device unauthorized",
+        "protocol fault",
+        "connection closed",
+        "cannot connect to daemon"
+    ]
 }

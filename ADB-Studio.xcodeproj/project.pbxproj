@@ -9,6 +9,8 @@
 /* Begin PBXBuildFile section */
 		7C92DA4E342DC74D3E9C4A56 /* InstalledAppRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21ED6789435F967A7C9B60DE /* InstalledAppRow.swift */; };
 		B4A0E97B24E46EEBF0EF6620 /* InstalledAppsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1CA7078B945077C30D30D25 /* InstalledAppsViewModel.swift */; };
+		A1B2C3D40000000000000011 /* BulkUninstall.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D40000000000000001 /* BulkUninstall.swift */; };
+		A1B2C3D40000000000000012 /* BulkUninstallSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D40000000000000002 /* BulkUninstallSheet.swift */; };
 		D33D7E38DA7214CCE1AF2FE7 /* InstalledApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55A8D4C81788B3278F7D5F24 /* InstalledApp.swift */; };
 		E00000010000000000000001 /* ADB_StudioApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = E00000020000000000000001 /* ADB_StudioApp.swift */; };
 		E00000010000000000000002 /* DependencyContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = E00000020000000000000002 /* DependencyContainer.swift */; };
@@ -82,6 +84,8 @@
 /* Begin PBXFileReference section */
 		21ED6789435F967A7C9B60DE /* InstalledAppRow.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = InstalledAppRow.swift; sourceTree = "<group>"; };
 		55A8D4C81788B3278F7D5F24 /* InstalledApp.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = InstalledApp.swift; sourceTree = "<group>"; };
+		A1B2C3D40000000000000001 /* BulkUninstall.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BulkUninstall.swift; sourceTree = "<group>"; };
+		A1B2C3D40000000000000002 /* BulkUninstallSheet.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BulkUninstallSheet.swift; sourceTree = "<group>"; };
 		CED2523D7F78C0B0CCE9EF28 /* InstalledAppsView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = InstalledAppsView.swift; sourceTree = "<group>"; };
 		D1CA7078B945077C30D30D25 /* InstalledAppsViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = InstalledAppsViewModel.swift; sourceTree = "<group>"; };
 		E00000020000000000000001 /* ADB_StudioApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ADB_StudioApp.swift; sourceTree = "<group>"; };
@@ -170,6 +174,7 @@
 			children = (
 				CED2523D7F78C0B0CCE9EF28 /* InstalledAppsView.swift */,
 				21ED6789435F967A7C9B60DE /* InstalledAppRow.swift */,
+				A1B2C3D40000000000000002 /* BulkUninstallSheet.swift */,
 			);
 			name = InstalledApps;
 			path = InstalledApps;
@@ -227,6 +232,7 @@
 				E00000020000000000000031 /* AppSettings.swift */,
 				E00000020000000000000034 /* DiscoveredDevice.swift */,
 				55A8D4C81788B3278F7D5F24 /* InstalledApp.swift */,
+				A1B2C3D40000000000000001 /* BulkUninstall.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -635,6 +641,8 @@
 				E00000010000000000000067 /* PortForwardPresetRowView.swift in Sources */,
 				E00000010000000000000068 /* PortForwardSettingsViewModel.swift in Sources */,
 				D33D7E38DA7214CCE1AF2FE7 /* InstalledApp.swift in Sources */,
+				A1B2C3D40000000000000011 /* BulkUninstall.swift in Sources */,
+				A1B2C3D40000000000000012 /* BulkUninstallSheet.swift in Sources */,
 				B4A0E97B24E46EEBF0EF6620 /* InstalledAppsViewModel.swift in Sources */,
 				FCC1383DCF24102D2B126FD5 /* InstalledAppsView.swift in Sources */,
 				7C92DA4E342DC74D3E9C4A56 /* InstalledAppRow.swift in Sources */,
