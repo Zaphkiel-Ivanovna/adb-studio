@@ -21,6 +21,14 @@ final class InstalledAppsViewModel: ObservableObject {
     @Published var appToUninstall: InstalledApp?
     @Published var keepDataOnUninstall = false
 
+    @Published private(set) var isSelectionMode = false
+    @Published private(set) var selectedPackageNames: Set<String> = []
+
+    @Published var showBulkUninstallSheet = false
+    @Published var bulkKeepData = false
+    @Published private(set) var bulkPhase: BulkUninstallPhase = .confirming
+    @Published private(set) var isBulkStopRequested = false
+
     // Cached filtered results for performance
     @Published private(set) var filteredApps: [InstalledApp] = []
     private var debouncedSearchText = ""
@@ -31,6 +39,12 @@ final class InstalledAppsViewModel: ObservableObject {
     private let adbService: ADBService
     private var loadedDetails: Set<String> = []
     private var isLoadingDetails: Set<String> = []
+
+    private var bulkUninstallTask: Task<Void, Never>?
+
+    deinit {
+        bulkUninstallTask?.cancel()
+    }
 
     private func debounceSearch() {
         searchDebounceTask?.cancel()
@@ -125,6 +139,7 @@ final class InstalledAppsViewModel: ObservableObject {
                     isEnabled: !disabledPackages.contains(packageName)
                 )
             }
+            selectedPackageNames.formIntersection(apps.map(\.packageName))
             updateFilteredApps()
         } catch let error as ADBError {
             errorMessage = error.localizedDescription
@@ -181,17 +196,11 @@ final class InstalledAppsViewModel: ObservableObject {
                 showSuccess("Stopped \(app.effectiveDisplayName)")
 
             case .uninstall:
-                try await adbService.uninstallApp(packageName: app.packageName, keepData: false, deviceId: deviceId)
-                apps.removeAll { $0.packageName == app.packageName }
-                loadedDetails.remove(app.packageName)
-                updateFilteredApps()
+                try await uninstall(app, keepData: false)
                 showSuccess("Uninstalled \(app.effectiveDisplayName)")
 
             case .uninstallKeepData:
-                try await adbService.uninstallApp(packageName: app.packageName, keepData: true, deviceId: deviceId)
-                apps.removeAll { $0.packageName == app.packageName }
-                loadedDetails.remove(app.packageName)
-                updateFilteredApps()
+                try await uninstall(app, keepData: true)
                 showSuccess("Uninstalled \(app.effectiveDisplayName) (data kept)")
 
             case .disable:
@@ -244,6 +253,135 @@ final class InstalledAppsViewModel: ObservableObject {
         showUninstallConfirmation = false
         appToUninstall = nil
         keepDataOnUninstall = false
+    }
+
+    // MARK: - Selection
+
+    var selectedApps: [InstalledApp] {
+        apps
+            .filter { selectedPackageNames.contains($0.packageName) }
+            .sorted { $0.effectiveDisplayName.localizedCaseInsensitiveCompare($1.effectiveDisplayName) == .orderedAscending }
+    }
+
+    var selectedSystemAppCount: Int {
+        apps.filter { selectedPackageNames.contains($0.packageName) && $0.isSystemApp }.count
+    }
+
+    var areAllFilteredSelected: Bool {
+        !filteredApps.isEmpty && filteredApps.allSatisfy { selectedPackageNames.contains($0.packageName) }
+    }
+
+    func toggleSelectionMode() {
+        isSelectionMode.toggle()
+        if !isSelectionMode {
+            selectedPackageNames.removeAll()
+        }
+    }
+
+    func toggleSelection(for app: InstalledApp) {
+        if selectedPackageNames.contains(app.packageName) {
+            selectedPackageNames.remove(app.packageName)
+        } else {
+            selectedPackageNames.insert(app.packageName)
+        }
+    }
+
+    func selectAllFiltered() {
+        selectedPackageNames.formUnion(filteredApps.map(\.packageName))
+    }
+
+    func deselectAll() {
+        selectedPackageNames.removeAll()
+    }
+
+    // MARK: - Bulk Uninstall
+
+    var isBulkUninstalling: Bool {
+        if case .running = bulkPhase { return true }
+        return false
+    }
+
+    func requestBulkUninstall() {
+        guard !selectedPackageNames.isEmpty else { return }
+        bulkPhase = .confirming
+        bulkKeepData = false
+        isBulkStopRequested = false
+        showBulkUninstallSheet = true
+    }
+
+    func confirmBulkUninstall() {
+        let targets = selectedApps
+        guard let firstApp = targets.first, bulkUninstallTask == nil else { return }
+
+        let keepData = bulkKeepData
+        isBulkStopRequested = false
+        errorMessage = nil
+        bulkPhase = .running(current: 1, total: targets.count, appName: firstApp.effectiveDisplayName)
+        bulkUninstallTask = Task { [weak self] in
+            await self?.runBulkUninstall(targets, keepData: keepData)
+        }
+    }
+
+    func requestBulkUninstallStop() {
+        isBulkStopRequested = true
+    }
+
+    func dismissBulkUninstall() {
+        if case .finished(_, let failures, let skipped) = bulkPhase, failures.isEmpty, skipped == 0 {
+            isSelectionMode = false
+            selectedPackageNames.removeAll()
+        }
+        bulkKeepData = false
+        isBulkStopRequested = false
+    }
+
+    private func runBulkUninstall(_ targets: [InstalledApp], keepData: Bool) async {
+        var failures: [BulkUninstallFailure] = []
+        var succeeded = 0
+
+        for (index, app) in targets.enumerated() {
+            if isBulkStopRequested || Task.isCancelled { break }
+            bulkPhase = .running(current: index + 1, total: targets.count, appName: app.effectiveDisplayName)
+
+            do {
+                try await uninstall(app, keepData: keepData)
+                succeeded += 1
+            } catch let error as ADBError {
+                failures.append(failure(for: app, message: error.localizedDescription))
+                if error.isDeviceUnreachable { break }
+            } catch {
+                failures.append(failure(for: app, message: error.localizedDescription))
+            }
+        }
+
+        bulkPhase = .finished(
+            succeeded: succeeded,
+            failures: failures,
+            skipped: targets.count - succeeded - failures.count
+        )
+        bulkUninstallTask = nil
+    }
+
+    // MARK: - Private Helpers
+
+    private func uninstall(_ app: InstalledApp, keepData: Bool) async throws {
+        try await adbService.uninstallApp(packageName: app.packageName, keepData: keepData, deviceId: deviceId)
+        removeUninstalledApp(app.packageName)
+    }
+
+    private func failure(for app: InstalledApp, message: String) -> BulkUninstallFailure {
+        BulkUninstallFailure(
+            packageName: app.packageName,
+            displayName: app.effectiveDisplayName,
+            message: message
+        )
+    }
+
+    private func removeUninstalledApp(_ packageName: String) {
+        apps.removeAll { $0.packageName == packageName }
+        selectedPackageNames.remove(packageName)
+        loadedDetails.remove(packageName)
+        updateFilteredApps()
     }
 
     private func showSuccess(_ message: String) {

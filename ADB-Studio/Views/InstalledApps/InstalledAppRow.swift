@@ -3,6 +3,9 @@ import SwiftUI
 struct InstalledAppRow: View {
     let app: InstalledApp
     let isActioning: Bool
+    let isSelectionMode: Bool
+    let isSelected: Bool
+    let onToggleSelection: () -> Void
     let onAction: (AppAction) -> Void
 
     private static let dateFormatter: DateFormatter = {
@@ -14,6 +17,10 @@ struct InstalledAppRow: View {
 
     var body: some View {
         HStack(spacing: 12) {
+            if isSelectionMode {
+                selectionIndicator
+            }
+
             appIcon
 
             VStack(alignment: .leading, spacing: 4) {
@@ -60,13 +67,29 @@ struct InstalledAppRow: View {
             if isActioning {
                 ProgressView()
                     .controlSize(.small)
-            } else {
+            } else if !isSelectionMode {
                 actionMenu
             }
         }
         .padding(.vertical, 10)
         .padding(.horizontal, 4)
         .contentShape(Rectangle())
+        .onTapGesture {
+            if isSelectionMode {
+                onToggleSelection()
+            }
+        }
+    }
+
+    private var selectionIndicator: some View {
+        Button(action: onToggleSelection) {
+            Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
+                .font(.system(size: 18))
+                .foregroundColor(isSelected ? .accentColor : .secondary)
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(app.effectiveDisplayName)
+        .accessibilityAddTraits(isSelected ? [.isButton, .isSelected] : .isButton)
     }
 
     private var appIcon: some View {

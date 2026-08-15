@@ -29,6 +29,10 @@ struct InstalledAppsView: View {
                 appList
             }
 
+            if viewModel.isSelectionMode {
+                selectionActionBar
+            }
+
             footerView
         }
         .padding()
@@ -40,6 +44,9 @@ struct InstalledAppsView: View {
                     await viewModel.loadApps()
                 }
             }
+        }
+        .sheet(isPresented: $viewModel.showBulkUninstallSheet, onDismiss: viewModel.dismissBulkUninstall) {
+            BulkUninstallSheet(viewModel: viewModel)
         }
         .alert("Uninstall App", isPresented: $viewModel.showUninstallConfirmation) {
             Button("Cancel", role: .cancel) {
@@ -68,6 +75,12 @@ struct InstalledAppsView: View {
 
             Spacer()
 
+            Button(viewModel.isSelectionMode ? "Cancel" : "Select") {
+                viewModel.toggleSelectionMode()
+            }
+            .buttonStyle(.borderless)
+            .disabled(!viewModel.isSelectionMode && viewModel.apps.isEmpty)
+
             Button {
                 Task {
                     await viewModel.loadApps()
@@ -79,6 +92,32 @@ struct InstalledAppsView: View {
             .disabled(viewModel.isLoading)
         }
         .padding(.bottom, 8)
+    }
+
+    private var selectionActionBar: some View {
+        HStack(spacing: 12) {
+            Text("\(viewModel.selectedPackageNames.count) selected")
+                .font(.caption)
+                .foregroundColor(.secondary)
+
+            Button(viewModel.areAllFilteredSelected ? "Deselect All" : "Select All") {
+                if viewModel.areAllFilteredSelected {
+                    viewModel.deselectAll()
+                } else {
+                    viewModel.selectAllFiltered()
+                }
+            }
+            .buttonStyle(.borderless)
+            .font(.caption)
+
+            Spacer()
+
+            Button("Uninstall", role: .destructive) {
+                viewModel.requestBulkUninstall()
+            }
+            .disabled(viewModel.selectedPackageNames.isEmpty)
+        }
+        .padding(.top, 12)
     }
 
     private var filterBar: some View {
@@ -151,6 +190,9 @@ struct InstalledAppsView: View {
                     InstalledAppRow(
                         app: app,
                         isActioning: viewModel.appBeingActioned == app.packageName,
+                        isSelectionMode: viewModel.isSelectionMode,
+                        isSelected: viewModel.selectedPackageNames.contains(app.packageName),
+                        onToggleSelection: { viewModel.toggleSelection(for: app) },
                         onAction: { action in
                             if action == .uninstall {
                                 viewModel.requestUninstall(app, keepData: false)
