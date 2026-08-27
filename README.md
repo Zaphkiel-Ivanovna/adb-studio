@@ -1,3 +1,5 @@
+
+
 <p align="center">
   <img src=".github/assets/app-icon.jpg" alt="ADB Studio" width="1355" >
 </p>
@@ -108,7 +110,7 @@ git clone https://github.com/Zaphkiel-Ivanovna/adb-studio.git
 cd adb-studio
 
 # Build with Xcode
-xcodebuild -scheme "ADB-Studio" -configuration Release build
+xcodebuild -scheme "ADB-Studio" -configuration Release -destination "platform=macOS,arch=arm64" build
 
 # Or open in Xcode
 open ADB-Studio.xcodeproj
