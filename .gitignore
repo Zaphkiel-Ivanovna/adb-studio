@@ -55,6 +55,7 @@ playground.xcworkspace
 .env
 .env.*
 *.pem
+*.p8
 *.p12
 *.mobileprovision
 

@@ -6,14 +6,20 @@ on:
   pull_request:
     branches: [main, develop]
 
+permissions: {}
+
 jobs:
   build:
     name: 🔨 Build & Test
     runs-on: macos-26
+    permissions:
+      contents: read
 
     steps:
       - name: 📥 Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false
 
       - name: 🛠️ Select Xcode
         run: sudo xcode-select -s /Applications/Xcode_26.0.app/Contents/Developer
@@ -47,10 +53,14 @@ jobs:
   swiftlint:
     name: 🧹 SwiftLint
     runs-on: macos-26
+    permissions:
+      contents: read
 
     steps:
       - name: 📥 Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false
 
       - name: 📦 Install SwiftLint
         run: brew install swiftlint
@@ -62,10 +72,14 @@ jobs:
   swift-format:
     name: 📐 Swift Format Check
     runs-on: macos-26
+    permissions:
+      contents: read
 
     steps:
       - name: 📥 Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false
 
       - name: 📦 Install swift-format
         run: brew install swift-format
