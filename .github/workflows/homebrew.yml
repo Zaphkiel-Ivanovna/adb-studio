@@ -1,0 +1,85 @@
+name: 🍺 Homebrew
+
+on:
+  release:
+    types: [published]
+
+permissions: {}
+
+concurrency:
+  group: homebrew-tap
+  cancel-in-progress: false
+
+jobs:
+  update-tap:
+    name: 🍺 Update Homebrew Tap
+    if: ${{ !github.event.release.prerelease }}
+    runs-on: ubuntu-latest
+    environment: homebrew
+    permissions:
+      contents: read
+
+    steps:
+      - name: 🔢 Compute ZIP checksum
+        id: release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          TAG: ${{ github.event.release.tag_name }}
+        run: |
+          VERSION="${TAG#v}"
+          if [[ ! "${VERSION}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::The release tag must be a stable semantic version such as v1.2.3."
+            exit 1
+          fi
+
+          gh release download "${TAG}" --pattern "ADB-Studio-${VERSION}.zip"
+          ZIP_SHA256="$(sha256sum "ADB-Studio-${VERSION}.zip" | awk '{ print $1 }')"
+
+          echo "VERSION=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "ZIP_SHA256=${ZIP_SHA256}" >> "$GITHUB_OUTPUT"
+
+      - name: 🍺 Update cask
+        env:
+          TAP_GITHUB_TOKEN: ${{ secrets.TAP_GITHUB_TOKEN }}
+          VERSION: ${{ steps.release.outputs.VERSION }}
+          ZIP_SHA256: ${{ steps.release.outputs.ZIP_SHA256 }}
+        run: |
+          git config --global url."https://x-access-token:${TAP_GITHUB_TOKEN}@github.com/".insteadOf "https://github.com/"
+          git clone https://github.com/Zaphkiel-Ivanovna/homebrew-tap.git
+          cd homebrew-tap
+
+          cat > Casks/adb-studio.rb << CASK
+          cask "adb-studio" do
+            version "${VERSION}"
+            sha256 "${ZIP_SHA256}"
+
+            url "https://github.com/Zaphkiel-Ivanovna/adb-studio/releases/download/v#{version}/ADB-Studio-#{version}.zip",
+                verified: "github.com/Zaphkiel-Ivanovna/adb-studio/"
+            name "ADB Studio"
+            desc "Manage Android devices via ADB"
+            homepage "https://github.com/Zaphkiel-Ivanovna/adb-studio"
+
+            livecheck do
+              url :url
+              strategy :github_latest
+            end
+
+            depends_on macos: ">= :sonoma"
+
+            app "ADB-Studio.app"
+
+            zap trash: [
+              "~/Library/Application Support/ADB-Studio",
+              "~/Library/Caches/dev.zaphkiel.adbstudio",
+              "~/Library/Preferences/dev.zaphkiel.adbstudio.plist",
+              "~/Library/Saved Application State/dev.zaphkiel.adbstudio.savedState",
+            ]
+          end
+          CASK
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add Casks/adb-studio.rb
+          git commit -m "⬆️ Update ADB Studio to v${VERSION}"
+          git push

@@ -5,17 +5,42 @@ on:
     tags:
       - 'v*'
 
-permissions:
-  contents: write
+permissions: {}
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
-  build-and-release:
-    name: 📦 Build & Release
+  build:
+    name: 🏗️ Build
     runs-on: macos-26
+    permissions:
+      contents: read
+    outputs:
+      version: ${{ steps.version.outputs.VERSION }}
+      prerelease: ${{ steps.version.outputs.PRERELEASE }}
 
     steps:
       - name: 📥 Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false
+
+      - name: 🏷️ Get version from tag
+        id: version
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          if [[ ! "${VERSION}" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.]+)?$ ]]; then
+            echo "::error::The tag must be a semantic version such as v1.2.3 or v1.2.3-beta.1."
+            exit 1
+          fi
+          PRERELEASE=false
+          if [[ "${VERSION}" == *-* ]]; then
+            PRERELEASE=true
+          fi
+          echo "VERSION=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "PRERELEASE=${PRERELEASE}" >> "$GITHUB_OUTPUT"
 
       - name: 🛠️ Select Xcode
         run: sudo xcode-select -s /Applications/Xcode_26.0.app/Contents/Developer
@@ -23,11 +48,10 @@ jobs:
       - name: 📋 Show Xcode version
         run: xcodebuild -version
 
-      - name: 🏷️ Get version from tag
-        id: version
-        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
-
       - name: 🏗️ Build Release
+        env:
+          VERSION: ${{ steps.version.outputs.VERSION }}
+          BUILD_NUMBER: ${{ github.run_number }}
         run: |
           xcodebuild -scheme "ADB-Studio" \
             -configuration Release \
@@ -37,110 +61,230 @@ jobs:
             CODE_SIGN_IDENTITY="-" \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGNING_ALLOWED=NO \
-            MARKETING_VERSION="${{ steps.version.outputs.VERSION }}" \
-            CURRENT_PROJECT_VERSION="${{ github.run_number }}"
+            MARKETING_VERSION="${VERSION}" \
+            CURRENT_PROJECT_VERSION="${BUILD_NUMBER}"
 
-      - name: 🔏 Ad-hoc Sign
+      - name: 📦 Package unsigned app
+        run: ditto -c -k --keepParent "build/Build/Products/Release/ADB-Studio.app" unsigned-app.zip
+
+      - name: 📤 Upload unsigned app
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: unsigned-app
+          path: unsigned-app.zip
+          if-no-files-found: error
+          retention-days: 3
+
+  sign:
+    name: 🔏 Sign & Notarize
+    needs: build
+    runs-on: macos-26
+    environment: release
+    permissions:
+      contents: read
+
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false
+
+      - name: 🛠️ Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode_26.0.app/Contents/Developer
+
+      - name: 📥 Download unsigned app
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: unsigned-app
+
+      - name: 📦 Unpack unsigned app
+        run: ditto -x -k unsigned-app.zip build
+
+      - name: 🔑 Import Developer ID certificate
+        env:
+          DEVELOPER_ID_CERT_P12: ${{ secrets.DEVELOPER_ID_CERT_P12 }}
+          DEVELOPER_ID_CERT_PASSWORD: ${{ secrets.DEVELOPER_ID_CERT_PASSWORD }}
         run: |
-          codesign --force --deep --sign - "build/Build/Products/Release/ADB-Studio.app"
+          if [ -z "${DEVELOPER_ID_CERT_P12}" ] || [ -z "${DEVELOPER_ID_CERT_PASSWORD}" ]; then
+            echo "::error::DEVELOPER_ID_CERT_P12 and DEVELOPER_ID_CERT_PASSWORD secrets are required to sign the release."
+            exit 1
+          fi
+
+          KEYCHAIN_PATH="${RUNNER_TEMP}/signing.keychain-db"
+          KEYCHAIN_PASSWORD="$(openssl rand -base64 32)"
+          CERT_PATH="${RUNNER_TEMP}/developer-id.p12"
+
+          echo -n "${DEVELOPER_ID_CERT_P12}" | base64 --decode -o "${CERT_PATH}"
+          security create-keychain -p "${KEYCHAIN_PASSWORD}" "${KEYCHAIN_PATH}"
+          security set-keychain-settings -lut 21600 "${KEYCHAIN_PATH}"
+          security unlock-keychain -p "${KEYCHAIN_PASSWORD}" "${KEYCHAIN_PATH}"
+          security import "${CERT_PATH}" -P "${DEVELOPER_ID_CERT_PASSWORD}" -T /usr/bin/codesign -f pkcs12 -k "${KEYCHAIN_PATH}"
+          security set-key-partition-list -S apple-tool:,apple: -k "${KEYCHAIN_PASSWORD}" "${KEYCHAIN_PATH}" > /dev/null
+          read -r -a USER_KEYCHAINS <<< "$(security list-keychains -d user | tr -d '"' | xargs)"
+          security list-keychains -d user -s "${KEYCHAIN_PATH}" "${USER_KEYCHAINS[@]}"
+          rm -f "${CERT_PATH}"
+
+          IDENTITY="$(security find-identity -v -p codesigning "${KEYCHAIN_PATH}" | awk '/"Developer ID Application/ { print $2; exit }')"
+          if [ -z "${IDENTITY}" ]; then
+            echo "::error::The imported certificate holds no valid 'Developer ID Application' identity."
+            exit 1
+          fi
+
+          echo "KEYCHAIN_PATH=${KEYCHAIN_PATH}" >> "$GITHUB_ENV"
+          echo "DEVELOPER_ID_IDENTITY=${IDENTITY}" >> "$GITHUB_ENV"
+
+      - name: 🔑 Prepare notarization key
+        env:
+          NOTARY_API_KEY: ${{ secrets.NOTARY_API_KEY }}
+          NOTARY_API_KEY_ID: ${{ secrets.NOTARY_API_KEY_ID }}
+          NOTARY_API_ISSUER_ID: ${{ secrets.NOTARY_API_ISSUER_ID }}
+        run: |
+          if [ -z "${NOTARY_API_KEY}" ] || [ -z "${NOTARY_API_KEY_ID}" ] || [ -z "${NOTARY_API_ISSUER_ID}" ]; then
+            echo "::error::NOTARY_API_KEY, NOTARY_API_KEY_ID and NOTARY_API_ISSUER_ID secrets are required to notarize the release."
+            exit 1
+          fi
+
+          KEY_PATH="${RUNNER_TEMP}/AuthKey_${NOTARY_API_KEY_ID}.p8"
+          printf '%s\n' "${NOTARY_API_KEY}" > "${KEY_PATH}"
+          chmod 600 "${KEY_PATH}"
+
+          echo "NOTARY_API_KEY_PATH=${KEY_PATH}" >> "$GITHUB_ENV"
+
+      - name: 🔏 Sign with Developer ID
+        run: scripts/codesign-app.sh "build/ADB-Studio.app"
+
+      - name: 📮 Notarize app
+        env:
+          NOTARY_API_KEY_ID: ${{ secrets.NOTARY_API_KEY_ID }}
+          NOTARY_API_ISSUER_ID: ${{ secrets.NOTARY_API_ISSUER_ID }}
+        run: scripts/notarize.sh "build/ADB-Studio.app"
 
       - name: 💿 Create DMG
+        env:
+          VERSION: ${{ needs.build.outputs.version }}
         run: |
-          APP_NAME="ADB-Studio"
           DMG_DIR="dmg-contents"
-          FINAL_DMG="ADB-Studio-${{ steps.version.outputs.VERSION }}.dmg"
+          DMG_PATH="ADB-Studio-${VERSION}.dmg"
 
           mkdir -p "${DMG_DIR}"
-          cp -R "build/Build/Products/Release/${APP_NAME}.app" "${DMG_DIR}/"
+          ditto "build/ADB-Studio.app" "${DMG_DIR}/ADB-Studio.app"
           ln -s /Applications "${DMG_DIR}/Applications"
 
           hdiutil create -srcfolder "${DMG_DIR}" \
-            -volname "${APP_NAME}" \
+            -volname "ADB-Studio" \
             -fs HFS+ \
             -format UDZO \
             -imagekey zlib-level=9 \
-            "${FINAL_DMG}"
+            "${DMG_PATH}"
 
-          echo "DMG_PATH=${FINAL_DMG}" >> $GITHUB_ENV
+          echo "DMG_PATH=${DMG_PATH}" >> "$GITHUB_ENV"
+
+      - name: 📮 Sign & notarize DMG
+        env:
+          NOTARY_API_KEY_ID: ${{ secrets.NOTARY_API_KEY_ID }}
+          NOTARY_API_ISSUER_ID: ${{ secrets.NOTARY_API_ISSUER_ID }}
+        run: |
+          codesign --force --timestamp --sign "${DEVELOPER_ID_IDENTITY}" "${DMG_PATH}"
+          scripts/notarize.sh "${DMG_PATH}"
 
       - name: 🗜️ Create ZIP
-        run: |
-          cd build/Build/Products/Release
-          zip -r -y "../../../../ADB-Studio-${{ steps.version.outputs.VERSION }}.zip" "ADB-Studio.app"
-          cd ../../../..
-          echo "ZIP_PATH=ADB-Studio-${{ steps.version.outputs.VERSION }}.zip" >> $GITHUB_ENV
+        env:
+          VERSION: ${{ needs.build.outputs.version }}
+        run: ditto -c -k --keepParent "build/ADB-Studio.app" "ADB-Studio-${VERSION}.zip"
 
-      - name: 🔐 Generate Checksums
+      - name: 🧹 Remove signing credentials
+        if: always()
         run: |
-          shasum -a 256 "${{ env.DMG_PATH }}" > checksums.txt
-          shasum -a 256 "${{ env.ZIP_PATH }}" >> checksums.txt
+          if [ -n "${KEYCHAIN_PATH:-}" ]; then
+            security delete-keychain "${KEYCHAIN_PATH}" || true
+          fi
+          rm -f "${NOTARY_API_KEY_PATH:-}"
+
+      - name: 📤 Upload signed release
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: signed-release
+          path: |
+            ADB-Studio-${{ needs.build.outputs.version }}.dmg
+            ADB-Studio-${{ needs.build.outputs.version }}.zip
+          if-no-files-found: error
+          retention-days: 3
+
+  notes:
+    name: 📝 Release Notes
+    runs-on: macos-26
+    environment: changelog
+    permissions:
+      contents: read
+
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: 🛠️ Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode_26.0.app/Contents/Developer
+
+      - name: 📝 Generate release notes
+        env:
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+          TAG: ${{ github.ref_name }}
+        run: xcrun swift scripts/changelog.swift "${TAG}" > release-notes.md
+
+      - name: 📤 Upload release notes
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: release-notes
+          path: release-notes.md
+          if-no-files-found: error
+          retention-days: 3
+
+  draft:
+    name: 🎉 Draft Release
+    needs: [build, sign, notes]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: 📥 Download signed release
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: signed-release
+
+      - name: 📥 Download release notes
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: release-notes
+
+      - name: 🔐 Generate checksums
+        env:
+          VERSION: ${{ needs.build.outputs.version }}
+        run: |
+          sha256sum "ADB-Studio-${VERSION}.dmg" "ADB-Studio-${VERSION}.zip" > checksums.txt
           cat checksums.txt
 
-      - name: 🔢 Extract ZIP SHA256
-        id: sha
-        run: |
-          SHA256=$(shasum -a 256 "${{ env.ZIP_PATH }}" | awk '{print $1}')
-          echo "ZIP_SHA256=${SHA256}" >> $GITHUB_OUTPUT
-
-      - name: 🎉 Create Release
-        uses: softprops/action-gh-release@v2
-        with:
-          name: ADB-Studio v${{ steps.version.outputs.VERSION }}
-          draft: false
-          prerelease: ${{ contains(github.ref, 'alpha') || contains(github.ref, 'beta') || contains(github.ref, 'rc') }}
-          generate_release_notes: true
-          files: |
-            ${{ env.DMG_PATH }}
-            ${{ env.ZIP_PATH }}
-            checksums.txt
+      - name: 🎉 Create draft release
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: 🍺 Update Homebrew Tap
-        if: ${{ !contains(github.ref, 'alpha') && !contains(github.ref, 'beta') && !contains(github.ref, 'rc') }}
-        env:
-          TAP_GITHUB_TOKEN: ${{ secrets.TAP_GITHUB_TOKEN }}
-          VERSION: ${{ steps.version.outputs.VERSION }}
-          ZIP_SHA256: ${{ steps.sha.outputs.ZIP_SHA256 }}
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          TAG: ${{ github.ref_name }}
+          VERSION: ${{ needs.build.outputs.version }}
+          PRERELEASE: ${{ needs.build.outputs.prerelease }}
         run: |
-          git config --global url."https://x-access-token:${TAP_GITHUB_TOKEN}@github.com/".insteadOf "https://github.com/"
-          git clone https://github.com/Zaphkiel-Ivanovna/homebrew-tap.git
-          cd homebrew-tap
+          TITLE="ADB-Studio v${VERSION}"
+          ASSETS=("ADB-Studio-${VERSION}.dmg" "ADB-Studio-${VERSION}.zip" checksums.txt)
 
-          cat > Casks/adb-studio.rb << CASK
-          cask "adb-studio" do
-            version "${VERSION}"
-            sha256 "${ZIP_SHA256}"
-
-            url "https://github.com/Zaphkiel-Ivanovna/adb-studio/releases/download/v#{version}/ADB-Studio-#{version}.zip",
-                verified: "github.com/Zaphkiel-Ivanovna/adb-studio/"
-            name "ADB Studio"
-            desc "Manage Android devices via ADB"
-            homepage "https://github.com/Zaphkiel-Ivanovna/adb-studio"
-
-            livecheck do
-              url :url
-              strategy :github_latest
-            end
-
-            depends_on macos: ">= :sonoma"
-
-            app "ADB-Studio.app"
-
-            zap trash: [
-              "~/Library/Application Support/ADB-Studio",
-              "~/Library/Caches/dev.zaphkiel.adbstudio",
-              "~/Library/Preferences/dev.zaphkiel.adbstudio.plist",
-              "~/Library/Saved Application State/dev.zaphkiel.adbstudio.savedState",
-            ]
-          end
-          CASK
-
-          # Remove leading whitespace from heredoc
-          sed -i '' 's/^          //' Casks/adb-studio.rb
-
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add Casks/adb-studio.rb
-          git commit -m "⬆️ Update ADB Studio to v${VERSION}"
-          git push
+          if [ "$(gh release view "${TAG}" --json isDraft --jq .isDraft 2> /dev/null)" = "true" ]; then
+            gh release edit "${TAG}" --title "${TITLE}" --notes-file release-notes.md --prerelease="${PRERELEASE}"
+            gh release upload "${TAG}" "${ASSETS[@]}" --clobber
+          else
+            gh release create "${TAG}" "${ASSETS[@]}" \
+              --draft \
+              --verify-tag \
+              --title "${TITLE}" \
+              --notes-file release-notes.md \
+              --prerelease="${PRERELEASE}"
+          fi
